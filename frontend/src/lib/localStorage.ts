@@ -104,3 +104,22 @@ export function getRandomQuestions(count: number, allowRepeats = false): QuizQue
 
 	return selectedQuestions;
 }
+
+export const USER_SETTINGS = 'userSettings';
+export interface UserSettings {
+	theme: 'light' | 'dark';
+	userName: string;
+}
+
+export function getUserSettings(): UserSettings {
+	if (typeof localStorage === 'undefined') return { theme: 'light', userName: '' };
+
+	const settings = localStorage.getItem(USER_SETTINGS);
+	return settings ? JSON.parse(settings) : { theme: 'light', userName: '' };
+}
+
+export function saveUserSettings(settings: UserSettings): void {
+	if (typeof localStorage === 'undefined') return;
+
+	localStorage.setItem(USER_SETTINGS, JSON.stringify(settings));
+}

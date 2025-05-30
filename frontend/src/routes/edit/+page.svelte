@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { browser } from '$app/environment';
   import { onMount } from 'svelte';
   import { getQuestions, searchQuestions, saveQuestion, updateQuestion, deleteQuestion } from '$lib/localStorage';
   import type { QuizQuestion } from '$lib/types';
+	import { toast } from '$lib/components/ui/toast';
 
   let questions: QuizQuestion[] = [];
   let isLoading = false;
@@ -71,10 +73,19 @@
     editingQuestion = null;
   }
 
+    function toggleCorrectAnswer(index: number) {
+    // Toggle the isCorrect status for the clicked answer
+    answers = answers.map((answer, i) => 
+      i === index ? { ...answer, isCorrect: !answer.isCorrect } : answer
+    );
+  }
+
   function handleSaveQuestion() {
     // Validate form
     if (!questionText.trim()) {
-      alert('Question text is required');
+      if (browser) {
+        toast.error('Question text is required');
+      }
       return;
     }
 
@@ -82,12 +93,16 @@
     const validAnswers = answers.filter(answer => answer.text.trim());
 
     if (validAnswers.length < 2) {
-      alert('At least two answer options are required');
+      if (browser) {
+        toast.error('At least two answer options are required');
+      }
       return;
     }
 
     if (!validAnswers.some(answer => answer.isCorrect)) {
-      alert('At least one answer must be marked as correct');
+      if (browser) {
+        toast.error('At least one answer must be marked as correct');
+      }
       return;
     }
 
@@ -111,14 +126,6 @@
     loadQuestions();
   }
 
-  function setCorrectAnswer(index: number) {
-    // Update the isCorrect status
-    answers = answers.map((answer, i) => ({
-      ...answer,
-      isCorrect: i === index
-    }));
-  }
-
   function addAnswerOption() {
     if (answers.length < 6) { // Limit to 6 answers
       answers = [...answers, { text: '', isCorrect: false }];
@@ -127,11 +134,10 @@
 
   function removeAnswerOption(index: number) {
     if (answers.length > 2) { // Ensure we have at least 2 answers
-      // If removing the correct answer, set the first remaining answer as correct
-      const wasCorrect = answers[index].isCorrect;
       answers = answers.filter((_, i) => i !== index);
       
-      if (wasCorrect && answers.length > 0) {
+      // Make sure at least one answer remains correct
+      if (!answers.some(answer => answer.isCorrect)) {
         answers[0] = { ...answers[0], isCorrect: true };
       }
     }
@@ -169,13 +175,14 @@
       />
     </div>
   </div>
-  
+  {#if !isAdding}
   <button
-    class="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
+    class="rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
     on:click={startAdd}
   >
     Add Question
   </button>
+  {/if}
 </div>
 
 {#if isAdding}
@@ -195,15 +202,15 @@
     
     <div class="mb-4">
       <label class="mb-1 block text-sm font-medium">Answer Options</label>
-      <p class="mb-2 text-sm text-muted-foreground">Select the radio button for the correct answer.</p>
+      <p class="mb-2 text-sm text-muted-foreground">Select the radio button for the correct answer(s).</p>
       
       {#each answers as answer, i}
         <div class="mb-2 flex items-center gap-2">
           <input
-            type="radio"
+            type="checkbox"
             name="correctAnswer"
             checked={answer.isCorrect}
-            on:change={() => setCorrectAnswer(i)}
+            on:change={() => toggleCorrectAnswer(i)}
           />
           <input
             type="text"
@@ -212,7 +219,7 @@
             bind:value={answer.text}
           />
           <button
-            class="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted"
+            class="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted hover:scale-105 active:scale-95"
             on:click={() => removeAnswerOption(i)}
             disabled={answers.length <= 2}
             title="Remove answer option"
@@ -234,13 +241,13 @@
     
     <div class="flex justify-end gap-2">
       <button
-        class="rounded-md border border-border px-4 py-2 hover:bg-muted"
+        class="rounded-md border border-border px-4 py-2 hover:bg-muted hover:scale-105 active:scale-95"
         on:click={cancelAdd}
       >
         Cancel
       </button>
       <button
-        class="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
+        class="rounded-md bg-primary px-4 py-2 border bg-green-200 text-green-400 dark:text-green-600 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
         on:click={handleSaveQuestion}
       >
         {editingQuestion ? 'Update' : 'Save'} Question
@@ -272,7 +279,7 @@
       <label class="text-sm">
         Show 
         <select
-          class="rounded-md border border-input bg-background px-2 py-1"
+          class="rounded-md border border-input dark:bg-slate-600 px-2 py-1"
           on:change={handleChangePerPage}
           value={questionsPerPage}
         >
@@ -309,15 +316,15 @@
                   {/each}
                 </ul>
               </td>
-              <td class="px-4 py-3 text-right">
+              <td class="px-4 py-4 text-right">
                 <button
-                  class="mr-2 rounded-md border border-border px-3 py-1 text-sm hover:bg-muted"
+                  class="md:mr-2 rounded-md min-w-[70px] border px-3 py-1 text-sm hover:bg-muted"
                   on:click={() => startEdit(question)}
                 >
                   Edit
                 </button>
                 <button
-                  class="rounded-md border border-border bg-red-50 px-3 py-1 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                  class="rounded-md min-w-[70px] border bg-red-50 px-3 py-1 mt-2 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                   on:click={() => handleDelete(question.id)}
                 >
                   Delete

@@ -1,18 +1,19 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
-	import { theme, userName } from '$lib/stores.js';
+	import { theme, userName } from '$lib/stores';
 	import { initSampleQuestions} from '$lib/sampleData';
+	import Toaster from '$lib/components/ui/toast/toaster.svelte';
+	import { getUserSettings } from '$lib/localStorage';
 
 	let { children } = $props();
 	
 	// Initialize theme from localStorage
 	onMount(() => {
-		const savedTheme = localStorage.getItem('quizTheme') || 'light';
-		const savedName = localStorage.getItem('userName') || '';
+		const { theme: savedTheme, userName: savedName } = getUserSettings();
 		theme.set(savedTheme);
 		userName.set(savedName);
-		
+
 		// Apply theme to document
 		document.documentElement.classList.toggle('dark', savedTheme === 'dark');
 		
@@ -24,6 +25,7 @@
 	$effect(() => {
 		if (typeof document !== 'undefined') {
 			document.documentElement.classList.toggle('dark', $theme === 'dark');
+			document.body.classList.toggle('dark', $theme === 'dark');
 			localStorage.setItem('quizTheme', $theme);
 		}
 	});
@@ -52,4 +54,5 @@
 			<p>Quiz Application &copy; {new Date().getFullYear()}</p>
 		</div>
 	</footer>
+	<Toaster />
 </div>

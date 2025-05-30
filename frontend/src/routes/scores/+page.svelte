@@ -95,7 +95,7 @@
   <div>
     <label class="mr-2 text-sm font-medium">Filter by Mode:</label>
     <select
-      class="rounded-md border border-input bg-background px-3 py-1"
+      class="rounded-md border border-input bg-background px-3 py-1 dark:bg-slate-600"
       bind:value={filterMode}
     >
       <option value="all">All Modes</option>
@@ -109,7 +109,7 @@
   <div>
     <label class="mr-2 text-sm font-medium">Sort by:</label>
     <select
-      class="rounded-md border border-input bg-background px-3 py-1"
+      class="rounded-md border border-input bg-background px-3 py-1 dark:bg-slate-600"
       bind:value={sortBy}
       on:change={() => {
         // Default sort direction for each sort type
@@ -125,7 +125,7 @@
     </select>
     
     <button
-      class="ml-2 rounded-md border border-border p-2 hover:bg-muted"
+      class="ml-2 rounded-md border border-border p-2 hover:bg-muted hover:scale-105 active:scale-95 transition-transform"
       on:click={() => sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'}
       title={`Currently sorting ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
     >
