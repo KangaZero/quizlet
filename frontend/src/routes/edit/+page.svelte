@@ -26,6 +26,37 @@
     loadQuestions();
   });
 
+  function exportQuestionsAsJson() {
+    // Get all questions, not just the filtered ones
+    const allQuestions = getQuestions();
+    
+    // Create a JSON string with proper formatting
+    const jsonString = JSON.stringify(allQuestions, null, 2);
+    
+    // Create a blob with the JSON data
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    
+    // Create a URL for the blob
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary link element
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quiz-questions-${new Date().toISOString().slice(0, 10)}.json`;
+    
+    // Append to the document, click to download, and remove
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // Clean up by revoking the URL
+    URL.revokeObjectURL(url);
+    
+    if (browser) {
+      toast.success('Questions exported successfully!');
+    }
+  }
+
   function loadQuestions() {
     isLoading = true;
     questions = searchTerm ? searchQuestions(searchTerm) : getQuestions();
@@ -160,8 +191,17 @@
     currentPage * questionsPerPage
   );
 </script>
-
+<div class="flex flex-row items-center justify-between mb-6">
 <h1 class="mb-6 text-2xl font-bold">Quiz Question Manager</h1>
+  <button
+      class="rounded-md border border-primary bg-blue-100 px-4 py-2 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 hover:scale-105 active:scale-95"
+      on:click={exportQuestionsAsJson}
+      disabled={questions.length === 0}
+      title={questions.length === 0 ? 'No questions to export' : 'Export all questions as JSON'}
+    >
+      Export JSON
+    </button>
+  </div>
 
 <div class="mb-6 flex flex-wrap items-center gap-4">
   <div class="flex-1">
