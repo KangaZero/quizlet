@@ -1,5 +1,6 @@
 <script lang="ts">
   import { userName } from '$lib/stores';
+  import { base } from '$app/paths';
 </script>
 
 <div class="flex min-h-[calc(100vh-10rem)] flex-col items-center justify-center text-center">
@@ -15,25 +16,25 @@
     <div class="flex flex-col items-center rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 class="mb-2 text-xl font-bold">Regular Mode</h2>
       <p class="mb-4 text-sm text-muted-foreground">10 unique questions with a 5-minute time limit</p>
-      <a href="/quiz?mode=regular" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
+      <a href="{base}/quiz?mode=regular" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
     </div>
     
     <div class="flex flex-col items-center rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 class="mb-2 text-xl font-bold">Endless Mode</h2>
       <p class="mb-4 text-sm text-muted-foreground">Start with 3 lives and answer as many questions as you can</p>
-      <a href="/quiz?mode=endless" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
+      <a href="{base}/quiz?mode=endless" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
     </div>
     
     <div class="flex flex-col items-center rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 class="mb-2 text-xl font-bold">Custom Mode</h2>
       <p class="mb-4 text-sm text-muted-foreground">Set your own number of questions and other options</p>
-      <a href="/quiz?mode=custom" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
+      <a href="{base}/quiz?mode=custom" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
     </div>
     
     <div class="flex flex-col items-center rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 class="mb-2 text-xl font-bold">Speedrun Mode</h2>
       <p class="mb-4 text-sm text-muted-foreground">50 unique questions, race against the clock!</p>
-      <a href="/quiz?mode=speedrun" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
+      <a href="{base}/quiz?mode=speedrun" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
     </div>
   </div>
 </div>
