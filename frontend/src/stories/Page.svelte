@@ -1,6 +1,7 @@
 <script lang="ts">
   import './page.css';
   import Header from './Header.svelte';
+  import Footer from './Footer.svelte';
 
   let user = $state<{ name: string }>();
 </script>
@@ -67,4 +68,8 @@
       Viewports addon in the toolbar
     </div>
   </section>
+  <Footer {user}
+    onLogin={() => (user = { name: 'Jane Doe' })}
+    onLogout={() => (user = undefined)}
+    onCreateAccount={() => (user = { name: 'Jane Doe' })}/>
 </article>

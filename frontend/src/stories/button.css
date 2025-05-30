@@ -7,6 +7,23 @@
   line-height: 1;
   font-family: 'Nunito Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+
+.storybook-button:hover,
+.storybook-button:focus {
+  filter: brightness(1.1);
+  scale: 1.05;
+  transform: 0.3 ease-in;
+  outline: none;
+  box-shadow: 0 0 0 2px #555ab933;
+}
+
+.storybook-button:active {
+  filter: brightness(0.95);
+  scale: 0.95;
+  transform: 0.3 ease-out;
+  box-shadow: 0 0 0 2px #555ab966;
+}
+
 .storybook-button--primary {
   background-color: #555ab9;
   color: white;
