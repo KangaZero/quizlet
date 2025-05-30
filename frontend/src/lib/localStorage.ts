@@ -13,6 +13,17 @@ export function getQuestions(): QuizQuestion[] {
 export function saveQuestion(question: QuizQuestion): void {
 	if (typeof localStorage === 'undefined') return;
 
+	// Initialize stats object if it doesn't exist
+	if (!question.stats) {
+		question.stats = {
+			accuracy: 0,
+			attempts: 0,
+			correctCount: 0,
+			incorrectCount: 0,
+			lastUsed: 0
+		};
+	}
+
 	const questions = getQuestions();
 	questions.push(question);
 	localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
@@ -122,4 +133,43 @@ export function saveUserSettings(settings: UserSettings): void {
 	if (typeof localStorage === 'undefined') return;
 
 	localStorage.setItem(USER_SETTINGS, JSON.stringify(settings));
+}
+
+// Function to update question statistics
+export function updateQuestionStats(questionId: string, wasCorrect: boolean): void {
+	if (typeof localStorage === 'undefined') return;
+
+	const questions = getQuestions();
+	const index = questions.findIndex((q) => q.id === questionId);
+
+	if (index !== -1) {
+		// Initialize stats object if it doesn't exist
+		if (!questions[index].stats) {
+			questions[index].stats = {
+				accuracy: 0,
+				attempts: 0,
+				correctCount: 0,
+				incorrectCount: 0,
+				lastUsed: Date.now()
+			};
+		}
+
+		// Update stats
+		const stats = questions[index].stats;
+		stats.attempts++;
+		if (wasCorrect) {
+			stats.correctCount++;
+		} else {
+			stats.incorrectCount++;
+		}
+
+		// Calculate accuracy
+		stats.accuracy = stats.correctCount / stats.attempts;
+
+		// Update last used timestamp
+		stats.lastUsed = Date.now();
+
+		// Save updated questions
+		localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
+	}
 }

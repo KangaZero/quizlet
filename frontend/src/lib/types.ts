@@ -5,7 +5,15 @@ export interface QuizQuestion {
 		text: string;
 		isCorrect: boolean;
 	}[];
-	createdAt: number;
+	createdAt: number; 
+	updatedAt: number;
+	stats: {
+		accuracy: number; // percentage
+		attempts: number; // total attempts
+		correctCount: number;
+		incorrectCount: number;
+		lastUsed: number; // timestamp of last use
+	}
 }
 
 export interface QuizScore {

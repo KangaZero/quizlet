@@ -1,9 +1,8 @@
-<script lang="ts">
-	import { onMount } from 'svelte';
+<script lang="ts">	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { userName } from '$lib/stores';
-	import { getRandomQuestions, saveScore } from '$lib/localStorage';
+	import { getRandomQuestions, saveScore, updateQuestionStats } from '$lib/localStorage';
 	import type { QuizQuestion } from '$lib/types';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
@@ -116,7 +115,6 @@
 		showNoQuestionsDialog = false;
 		goto('/');
 	}
-
 	function initQuiz() {
 		// Reset quiz state
 		currentQuestionIndex = 0;
@@ -128,6 +126,9 @@
 		isQuizStarted = true;
 		isQuizFinished = false;
 		startTime = Date.now();
+		
+		// Randomize the order of answers for all questions
+		questions = randomizeAnswerOrder(questions);
 
 		// Start timer for regular or speedrun mode
 		if (mode === 'regular') {
@@ -182,59 +183,114 @@
 		return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
 	}
 	function selectAnswer(answerIndex: number) {
-		// Get the current question and check how many correct answers it has
-		const currentQuestion = questions[currentQuestionIndex];
-		const correctAnswersCount = currentQuestion.answers.filter((a) => a.isCorrect).length;
+  // Get the current question and check how many correct answers it has
+  const currentQuestion = questions[currentQuestionIndex];
+  const correctAnswersCount = currentQuestion.answers.filter((a) => a.isCorrect).length;
 
-		// If we already have an answer selected and this is a single-answer question, return
-		if (correctAnswersCount === 1 && selectedAnswerIndex !== null) return;
+  // For speedrun mode, handle multiple answers immediately
+  if (mode === 'speedrun') {
+    if (correctAnswersCount === 1) {
+      // For single correct answer questions
+      selectedAnswerIndex = answerIndex;
+      const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
 
-		// For multiple correct answers, toggle selection
-		if (correctAnswersCount > 1) {
-			// If answer is already selected, deselect it
-			if (selectedAnswers.includes(answerIndex)) {
-				selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
-			} else {
-				// Otherwise, add it to the selected answers
-				selectedAnswers = [...selectedAnswers, answerIndex];
-			}
+      // Update question statistics
+      updateQuestionStats(currentQuestion.id, isCorrect);
 
-			// Don't proceed to automatic next question yet for multiple answer questions
-			return;
-		}
+      if (isCorrect) {
+        score++;
+      }
 
-		// For single correct answer questions, continue with original behavior
-		selectedAnswerIndex = answerIndex;
-		const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
+      // Immediately move to next question in speedrun mode
+      moveToNextQuestion();
+      return;
+    } else {
+      // For multiple correct answers in speedrun mode
+      // Toggle the selection
+      if (selectedAnswers.includes(answerIndex)) {
+        selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
+      } else {
+        selectedAnswers = [...selectedAnswers, answerIndex];
+      }
 
-		if (isCorrect) {
-			score++;
-			lastAnswerCorrect = true;
-		} else {
-			if (mode === 'endless') {
-				lives--;
+      // If all correct answers are selected (and only correct ones), move to next question
+      const correctAnswerIndices = currentQuestion.answers
+        .map((answer, index) => (answer.isCorrect ? index : -1))
+        .filter((index) => index !== -1);
+        
+      const allCorrectSelected = correctAnswerIndices.every(index => selectedAnswers.includes(index));
+      const noIncorrectSelected = selectedAnswers.every(index => correctAnswerIndices.includes(index));
+      
+      if (allCorrectSelected && noIncorrectSelected) {
+        // All correct answers are selected and no incorrect ones
+        updateQuestionStats(currentQuestion.id, true);
+        score++;
+        moveToNextQuestion();
+      } else if (selectedAnswers.length >= correctAnswersCount) {
+        // User has selected enough answers, but they're wrong
+        updateQuestionStats(currentQuestion.id, false);
+        moveToNextQuestion();
+      }
+      return;
+    }
+  }
 
-				if (lives <= 0) {
-					// In endless mode, run out of lives ends the quiz
-					setTimeout(finishQuiz, 1500);
-				}
-			}
+  // Regular behavior for other modes
+  
+  // If we already have an answer selected and this is a single-answer question, return
+  if (correctAnswersCount === 1 && selectedAnswerIndex !== null) return;
 
-			lastAnswerCorrect = false;
-		}
+  // For multiple correct answers, toggle selection
+  if (correctAnswersCount > 1) {
+    // If answer is already selected, deselect it
+    if (selectedAnswers.includes(answerIndex)) {
+      selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
+    } else {
+      // Otherwise, add it to the selected answers
+      selectedAnswers = [...selectedAnswers, answerIndex];
+    }
 
-		// Move to next question after a short delay
-		setTimeout(() => {
-			selectedAnswerIndex = null;
-			lastAnswerCorrect = null;
-			selectedAnswers = [];
+    // Don't proceed to automatic next question yet for multiple answer questions
+    return;
+  }
+  
+  // For single correct answer questions, continue with original behavior
+  selectedAnswerIndex = answerIndex;
+  const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
 
-			// Don't increment in endless mode if out of lives
-			if (!(mode === 'endless' && lives <= 0)) {
-				moveToNextQuestion();
-			}
-		}, 1500);
-	}
+  // Update question statistics
+  updateQuestionStats(currentQuestion.id, isCorrect);
+
+  if (isCorrect) {
+    score++;
+    lastAnswerCorrect = true;
+  } else {
+    if (mode === 'endless') {
+      lives--;
+
+      if (lives <= 0) {
+        // In endless mode, run out of lives ends the quiz
+        setTimeout(finishQuiz, 1500);
+      }
+    }
+
+    lastAnswerCorrect = false;
+  }
+
+  const delayBeforeNextQuestion = mode === 'speedrun' ? 0 : 1500;
+
+  // Move to next question after a short delay
+  setTimeout(() => {
+    selectedAnswerIndex = null;
+    lastAnswerCorrect = null;
+    selectedAnswers = [];
+
+    // Don't increment in endless mode if out of lives
+    if (!(mode === 'endless' && lives <= 0)) {
+      moveToNextQuestion();
+    }
+  }, delayBeforeNextQuestion);
+}
 
 	// Handle submission for multiple correct answer questions
 	function submitMultipleAnswers() {
@@ -242,11 +298,13 @@
 		const correctAnswerIndices = currentQuestion.answers
 			.map((answer, index) => (answer.isCorrect ? index : -1))
 			.filter((index) => index !== -1);
-
 		// Check if selected answers match exactly with correct answers
 		const isCorrect =
 			selectedAnswers.length === correctAnswerIndices.length &&
 			correctAnswerIndices.every((index) => selectedAnswers.includes(index));
+			
+		// Update question statistics
+		updateQuestionStats(currentQuestion.id, isCorrect);
 
 		if (isCorrect) {
 			score++;
@@ -320,7 +378,7 @@
 
 		let totalQuestions = currentQuestionIndex + 1;
 		if (mode === 'regular') totalQuestions = 10;
-		if (mode === 'speedrun') totalQuestions = 50;
+		if (mode === 'speedrun') totalQuestions = 20;
 
 		saveScore({
 			id: quizId,
@@ -342,6 +400,20 @@
 
 	function getCurrentQuestion() {
 		return questions[currentQuestionIndex];
+	}
+
+	// Function to randomize the order of answers for all questions
+	function randomizeAnswerOrder(questionList: QuizQuestion[]): QuizQuestion[] {
+		return questionList.map(question => {
+			// Create a deep copy of the question to avoid modifying the original
+			const questionCopy = JSON.parse(JSON.stringify(question));
+			
+			// Shuffle the answers array
+			const shuffledAnswers = [...questionCopy.answers].sort(() => Math.random() - 0.5);
+			questionCopy.answers = shuffledAnswers;
+			
+			return questionCopy;
+		});
 	}
 </script>
 
@@ -447,7 +519,7 @@
 				{/each}
 			</div>
 
-			{#if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.length > 0}
+			{#if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.length > 0 && mode !== 'speedrun'}
 				<div class="mt-4 text-center">
 					<button
 						class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
@@ -570,7 +642,7 @@
 							currentQuestionIndex === questions.length - 1 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
-							lastAnswerCorrect !== null
+						 lastAnswerCorrect !== null
 						)
 							? 'hover:scale-105 active:scale-95'
 							: ''}"

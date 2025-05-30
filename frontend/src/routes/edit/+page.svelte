@@ -11,6 +11,9 @@
   let isAdding = false;
   let currentPage = 1;
   let questionsPerPage = 20;
+
+   let sortBy = 'date';
+  let sortDirection: 'asc' | 'desc' = 'desc';
   
   // New question form
   let editingQuestion: QuizQuestion | null = null;
@@ -25,6 +28,17 @@
   onMount(() => {
     loadQuestions();
   });
+
+     function handleSort(field: string) {
+    if (sortBy === field) {
+      // Toggle direction if clicking the same field
+      sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      sortBy = field;
+      // Default to descending for date, ascending for others
+      sortDirection = field === 'date' ? 'desc' : 'asc';
+    }
+  }
 
   function exportQuestionsAsJson() {
     // Get all questions, not just the filtered ones
@@ -135,21 +149,28 @@
         toast.error('At least one answer must be marked as correct');
       }
       return;
-    }
-
-    // Save or update the question
+    }    // Save or update the question
     if (editingQuestion) {
       updateQuestion({
         ...editingQuestion,
         question: questionText.trim(),
-        answers: validAnswers
+        answers: validAnswers,
+        updatedAt: Date.now()
       });
     } else {
       saveQuestion({
         id: `q${Date.now()}`,
         question: questionText.trim(),
         answers: validAnswers,
-        createdAt: Date.now()
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        stats: {
+          accuracy: 0,
+          attempts: 0,
+          correctCount: 0,
+          incorrectCount: 0,
+          lastUsed: 0
+        }
       });
     }
 
@@ -186,7 +207,47 @@
 
   $: filteredQuestions = questions;
   $: totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
-  $: paginatedQuestions = filteredQuestions.slice(
+  $: sortedQuestions = [...filteredQuestions].sort((a, b) => {
+    let valueA, valueB;
+    
+    // Extract the correct values based on sortBy
+    switch (sortBy) {
+      case 'id':
+        valueA = a.id;
+        valueB = b.id;
+        break;
+      case 'accuracy':
+        valueA = a.stats?.accuracy || 0;
+        valueB = b.stats?.accuracy || 0;
+        break;
+      case 'attempts':
+        valueA = a.stats?.attempts || 0;
+        valueB = b.stats?.attempts || 0;
+        break;
+      case 'lastUsed':
+        valueA = a.stats?.lastUsed || 0;
+        valueB = b.stats?.lastUsed || 0;
+        break;
+      case 'question':
+        valueA = a.question.toLowerCase();
+        valueB = b.question.toLowerCase();
+        break;
+      case 'date':
+      default:
+        valueA = a.updatedAt || a.createdAt;
+        valueB = b.updatedAt || b.createdAt;
+    }
+    
+    // Sort in the correct direction
+    if (sortDirection === 'asc') {
+      if (typeof valueA === 'string') return valueA.localeCompare(valueB);
+      return valueA - valueB;
+    } else {
+      if (typeof valueA === 'string') return valueB.localeCompare(valueA);
+      return valueB - valueA;
+    }
+  });
+  $: paginatedQuestions = sortedQuestions.slice(
     (currentPage - 1) * questionsPerPage,
     currentPage * questionsPerPage
   );
@@ -194,7 +255,7 @@
 <div class="flex flex-row items-center justify-between mb-6">
 <h1 class="mb-6 text-2xl font-bold">Quiz Question Manager</h1>
   <button
-      class="rounded-md border border-primary bg-blue-100 px-4 py-2 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 hover:scale-105 active:scale-95"
+      class="cursor-pointer rounded-md border border-primary bg-blue-100 px-4 py-2 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 hover:scale-105 active:scale-95"
       on:click={exportQuestionsAsJson}
       disabled={questions.length === 0}
       title={questions.length === 0 ? 'No questions to export' : 'Export all questions as JSON'}
@@ -217,7 +278,7 @@
   </div>
   {#if !isAdding}
   <button
-    class="rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
+    class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
     on:click={startAdd}
   >
     Add Question
@@ -259,7 +320,7 @@
             bind:value={answer.text}
           />
           <button
-            class="rounded-md border border-border p-2 text-muted-foreground hover:bg-muted hover:scale-105 active:scale-95"
+            class="cursor-pointer rounded-md border border-border p-2 text-muted-foreground hover:bg-muted hover:scale-105 active:scale-95"
             on:click={() => removeAnswerOption(i)}
             disabled={answers.length <= 2}
             title="Remove answer option"
@@ -271,7 +332,7 @@
       
       {#if answers.length < 6}
         <button
-          class="mt-2 inline-flex items-center text-sm text-primary hover:underline"
+          class="cursor-pointer hover:scale-105 active:scale-95 mt-2 inline-flex items-center text-sm text-primary hover:underline"
           on:click={addAnswerOption}
         >
           + Add answer option
@@ -281,13 +342,13 @@
     
     <div class="flex justify-end gap-2">
       <button
-        class="rounded-md border border-border px-4 py-2 hover:bg-muted hover:scale-105 active:scale-95"
+        class="cursor-pointer rounded-md border border-border px-4 py-2 hover:bg-muted hover:scale-105 active:scale-95"
         on:click={cancelAdd}
       >
         Cancel
       </button>
       <button
-        class="rounded-md bg-primary px-4 py-2 border bg-green-200 text-green-400 dark:text-green-600 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
+        class="cursor-pointer rounded-md bg-primary px-4 py-2 border bg-green-200 text-green-400 dark:text-green-600 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
         on:click={handleSaveQuestion}
       >
         {editingQuestion ? 'Update' : 'Save'} Question
@@ -335,19 +396,63 @@
 
   <div class="rounded-lg border border-border">
     <div class="overflow-x-auto">
-      <table class="w-full">
-        <thead>
-          <tr class="border-b border-border bg-muted/50">
-            <th class="px-4 py-3 text-left text-sm font-medium">ID</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Question</th>
-            <th class="px-4 py-3 text-left text-sm font-medium">Answers</th>
-            <th class="px-4 py-3 text-right text-sm font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each paginatedQuestions as question (question.id)}
+      <table class="w-full">        
+       <thead>
+  <tr class="border-b border-border bg-muted/50">
+    <th 
+      class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
+      on:click={() => handleSort('id')}
+    >
+      ID {sortBy === 'id' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+    </th>
+    <th 
+      class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
+      on:click={() => handleSort('accuracy')}
+    >
+      Accuracy {sortBy === 'accuracy' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+    </th>
+    <th 
+      class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
+      on:click={() => handleSort('attempts')}
+    >
+      Attempts {sortBy === 'attempts' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+    </th>
+    <th 
+      class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
+      on:click={() => handleSort('lastUsed')}
+    >
+      Last Used {sortBy === 'lastUsed' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+    </th>
+    <th 
+      class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
+      on:click={() => handleSort('question')}
+    >
+      Question {sortBy === 'question' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
+    </th>
+    <th class="px-4 py-3 text-left text-sm font-medium">Answers</th>
+    <th class="px-4 py-3 text-right text-sm font-medium">Actions</th>
+  </tr>
+</thead>
+        <tbody>          {#each paginatedQuestions as question (question.id)}
             <tr class="border-b border-border hover:bg-muted/50">
               <td class="px-4 py-3 text-sm">{question.id}</td>
+              <td class="px-4 py-3 text-sm">
+                {#if question.stats?.accuracy !== undefined}
+                  {(question.stats.accuracy * 100).toFixed(1)}%
+                {:else}
+                  -
+                {/if}
+              </td>
+              <td class="px-4 py-3 text-sm">
+                {question.stats?.attempts || 0}
+              </td>
+              <td class="px-4 py-3 text-sm">
+                {#if question.stats?.lastUsed}
+                  {new Date(question.stats.lastUsed).toLocaleDateString()}
+                {:else}
+                  Never
+                {/if}
+              </td>
               <td class="px-4 py-3">{question.question}</td>
               <td class="px-4 py-3">
                 <ul class="list-inside list-disc space-y-1">
@@ -358,13 +463,13 @@
               </td>
               <td class="px-4 py-4 text-right">
                 <button
-                  class="md:mr-2 rounded-md min-w-[70px] border px-3 py-1 text-sm hover:bg-muted"
+                  class="cursor-pointer hover:scale-95 active:scale-105 rounded-md min-w-[70px] border px-3 py-1 text-sm hover:bg-muted"
                   on:click={() => startEdit(question)}
                 >
                   Edit
                 </button>
                 <button
-                  class="rounded-md min-w-[70px] border bg-red-50 px-3 py-1 mt-2 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
+                  class="cursor-pointer hover:scale-95 active:scale-105 rounded-md min-w-[70px] border bg-red-50 px-3 py-1 mt-2 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
                   on:click={() => handleDelete(question.id)}
                 >
                   Delete
@@ -381,7 +486,7 @@
     <div class="mt-4 flex justify-center">
       <div class="flex items-center space-x-2">
         <button
-          class="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
+          class="cursor-pointer rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === 1}
           on:click={() => changePage(currentPage - 1)}
         >
@@ -391,7 +496,7 @@
         {#each Array(totalPages) as _, i}
           {#if i + 1 === currentPage || i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
             <button
-              class="rounded-md border px-3 py-1 text-sm {currentPage === i + 1 ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'}"
+              class="cursor-pointer rounded-md border px-3 py-1 text-sm {currentPage === i + 1 ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'}"
               on:click={() => changePage(i + 1)}
             >
               {i + 1}
@@ -402,7 +507,8 @@
         {/each}
         
         <button
-          class="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
+          class="cursor-pointer 
+          rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === totalPages}
           on:click={() => changePage(currentPage + 1)}
         >
