@@ -5,6 +5,7 @@
 	import { getRandomQuestions, saveScore, updateQuestionStats } from '$lib/localStorage';
 	import type { QuizQuestion } from '$lib/types';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+import * as Accordion from "$lib/components/ui/accordion";
 
 	let showNoQuestionsDialog = false;
 	let showNotEnoughQuestionsDialog = false;
@@ -29,7 +30,13 @@
 	let selectedAnswerIndex: number | null = null;
 	let selectedAnswers: number[] = [];
 	let elapsedTime = 0;
-
+  // Advanced settings variables
+  let ageFilterUnit = 'days';
+  let ageFilterValue = '';
+  let accuracyMin = 0;
+  let accuracyMax = 100;
+  let showNoMatchingQuestionsDialog = false;
+ 
 	function startElapsedTimeTracking() {
 		if (elapsedTimeTimer) clearInterval(elapsedTimeTimer);
 
@@ -67,7 +74,6 @@
 			if (elapsedTimeTimer) clearInterval(elapsedTimeTimer);
 		};
 	});
-
 	function startQuiz() {
 		// Initialize questions based on mode
 		let count = 10; // Default for regular mode
@@ -84,8 +90,8 @@
 			allowRepeats = customAllowRepeats;
 		}
 
-		// Get all available questions and check if we have enough
-		const allQuestions = getRandomQuestions(count, allowRepeats);
+		// Get all available questions
+		const allQuestions = getRandomQuestions(count, false);  // Don't apply repeats here, we'll do it in our filter
 
 		if (allQuestions.length === 0) {
 			// Show the dialog instead of using alert()
@@ -93,16 +99,27 @@
 			return;
 		}
 
+		// Apply advanced filters in custom mode
+		const filteredQuestions = mode === 'custom' 
+			? applyAdvancedFilters(allQuestions, count, allowRepeats)
+			: allQuestions;
+
+		if (filteredQuestions.length === 0) {
+			// No questions match the filters
+			showNoMatchingQuestionsDialog = true;
+			return;
+		}
+
 		// If we don't have enough questions for the selected mode, show a warning
-		if (allQuestions.length < count && !allowRepeats) {
-			availableQuestionCount = allQuestions.length;
+		if (filteredQuestions.length < count && !allowRepeats) {
+			availableQuestionCount = filteredQuestions.length;
 			requestedQuestionCount = count;
 			showNotEnoughQuestionsDialog = true;
 			return; // Don't start quiz yet
 		}
 
 		// We have enough questions or repeats are allowed
-		questions = allQuestions;
+		questions = filteredQuestions;
 		initQuiz();
 	}
 
@@ -115,6 +132,11 @@
 		showNoQuestionsDialog = false;
 		goto('/');
 	}
+
+	function handleCancelNoMatchingQuestions() {
+		showNoMatchingQuestionsDialog = false;
+	}
+	
 	function initQuiz() {
 		// Reset quiz state
 		currentQuestionIndex = 0;
@@ -186,8 +208,7 @@
   // Get the current question and check how many correct answers it has
   const currentQuestion = questions[currentQuestionIndex];
   const correctAnswersCount = currentQuestion.answers.filter((a) => a.isCorrect).length;
-
-  // For speedrun mode, handle multiple answers immediately
+  // For speedrun mode, handle multiple answers with brief visual feedback
   if (mode === 'speedrun') {
     if (correctAnswersCount === 1) {
       // For single correct answer questions
@@ -199,10 +220,17 @@
 
       if (isCorrect) {
         score++;
+        lastAnswerCorrect = true;
+      } else {
+        lastAnswerCorrect = false;
       }
 
-      // Immediately move to next question in speedrun mode
-      moveToNextQuestion();
+      // Short delay to show feedback (green/red) then move to next question
+      setTimeout(() => {
+        selectedAnswerIndex = null;
+        lastAnswerCorrect = null;
+        moveToNextQuestion();
+      }, 300); // Very short delay for visual feedback in speedrun mode
       return;
     } else {
       // For multiple correct answers in speedrun mode
@@ -220,16 +248,25 @@
         
       const allCorrectSelected = correctAnswerIndices.every(index => selectedAnswers.includes(index));
       const noIncorrectSelected = selectedAnswers.every(index => correctAnswerIndices.includes(index));
-      
-      if (allCorrectSelected && noIncorrectSelected) {
+        if (allCorrectSelected && noIncorrectSelected) {
         // All correct answers are selected and no incorrect ones
         updateQuestionStats(currentQuestion.id, true);
         score++;
-        moveToNextQuestion();
+        lastAnswerCorrect = true;
+        setTimeout(() => {
+          lastAnswerCorrect = null;
+          selectedAnswers = [];
+          moveToNextQuestion();
+        }, 300);
       } else if (selectedAnswers.length >= correctAnswersCount) {
         // User has selected enough answers, but they're wrong
         updateQuestionStats(currentQuestion.id, false);
-        moveToNextQuestion();
+        lastAnswerCorrect = false;
+        setTimeout(() => {
+          lastAnswerCorrect = null;
+          selectedAnswers = [];
+          moveToNextQuestion();
+        }, 300);
       }
       return;
     }
@@ -415,6 +452,59 @@
 			return questionCopy;
 		});
 	}
+
+	// Function to filter questions based on advanced settings
+	function applyAdvancedFilters(allQuestions: QuizQuestion[], count: number, allowRepeats: boolean) {
+		let filteredQuestions = [...allQuestions];
+		
+		// Apply age filter if set
+		if (ageFilterValue && !isNaN(Number(ageFilterValue))) {
+			const now = Date.now();
+			let timeThreshold = now;
+			
+			// Calculate the threshold time based on the unit
+			switch (ageFilterUnit) {
+				case 'minutes':
+					timeThreshold = now - (Number(ageFilterValue) * 60 * 1000);
+					break;
+				case 'hours':
+					timeThreshold = now - (Number(ageFilterValue) * 60 * 60 * 1000);
+					break;
+				case 'days':
+				default:
+					timeThreshold = now - (Number(ageFilterValue) * 24 * 60 * 60 * 1000);
+			}
+			
+			// Filter questions based on the updatedAt or createdAt time
+			filteredQuestions = filteredQuestions.filter(q => 
+				(q.updatedAt || q.createdAt) >= timeThreshold
+			);
+		}
+		
+		// Apply accuracy filter if set
+		if (accuracyMin > 0 || accuracyMax < 100) {
+			filteredQuestions = filteredQuestions.filter(q => {
+				// If the question has never been attempted, include it regardless of accuracy filter
+				if (!q.stats || q.stats.attempts === 0) return true;
+				
+				const accuracyPercentage = q.stats.accuracy * 100;
+				return accuracyPercentage >= accuracyMin && accuracyPercentage <= accuracyMax;
+			});
+		}
+		
+		// If we need more questions than what's available and repeats are allowed, repeat questions
+		if (allowRepeats && filteredQuestions.length < count && filteredQuestions.length > 0) {
+			const originalLength = filteredQuestions.length;
+			
+			// Repeat questions until we have enough
+			while (filteredQuestions.length < count) {
+				filteredQuestions.push(...filteredQuestions.slice(0, Math.min(originalLength, count - filteredQuestions.length)));
+			}
+		}
+		
+		// Shuffle the questions
+		return filteredQuestions.sort(() => Math.random() - 0.5).slice(0, count);
+	}
 </script>
 
 {#if !isQuizStarted && mode === 'custom'}
@@ -438,7 +528,74 @@
 				<input type="checkbox" class="mr-2" bind:checked={customAllowRepeats} />
 				<span>Allow repeating questions</span>
 			</label>
-		</div>
+		</div>    <Accordion.Root>
+  <Accordion.Item value="item-1">
+    <Accordion.Trigger>Advanced settings</Accordion.Trigger>
+    <Accordion.Content>
+      <div class="space-y-4 py-2">
+        <!-- Age filter section -->
+        <div>
+          <label class="mb-2 block text-sm font-medium">Show questions not older than:</label>
+          <div class="flex items-center gap-2">
+            <input
+              type="number"
+              min="0"
+              class="border-input bg-background w-1/2 rounded-md border px-3 py-2"
+              bind:value={ageFilterValue}
+              placeholder="Enter value"
+            />
+            <select 
+              class="border-input dark:bg-slate-600  w-1/2 rounded-md border px-3 py-2"
+              bind:value={ageFilterUnit}
+            >
+              <option value="minutes">Minutes</option>
+              <option value="hours">Hours</option>
+              <option value="days">Days</option>
+            </select>
+          </div>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Leave empty to include questions of any age
+          </p>
+        </div>
+        
+        <!-- Accuracy range section -->
+        <div>
+          <label class="mb-2 block text-sm font-medium">
+            Accuracy range: {accuracyMin}% - {accuracyMax}%
+          </label>
+          <div class="space-y-2">
+            <div>
+              <span class="text-xs">Min: {accuracyMin}%</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                class="w-full"
+                bind:value={accuracyMin}
+              />
+            </div>
+            <div>
+              <span class="text-xs">Max: {accuracyMax}%</span>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                class="w-full"
+                bind:value={accuracyMax}
+              />
+            </div>
+          </div>
+          <p class="mt-1 text-xs text-muted-foreground">
+            Questions with no attempts will always be included
+          </p>
+        </div>
+      </div>
+    </Accordion.Content>
+  </Accordion.Item>
+</Accordion.Root>
+
 
 		<button
 			on:click={startQuiz}
@@ -650,7 +807,7 @@
 						disabled={currentQuestionIndex === questions.length - 1 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
-							lastAnswerCorrect !== null}
+						 lastAnswerCorrect !== null}
 					>
 						Next
 					</button>
@@ -727,6 +884,20 @@
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel on:click={handleCancelNoQuestions} class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action on:click={handleGoToEdit} class="text-sm text-green-400 hover:underline dark:text-green-600">Add Questions</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>
+
+<AlertDialog.Root bind:open={showNoMatchingQuestionsDialog}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<AlertDialog.Title>No Matching Questions</AlertDialog.Title>
+			<AlertDialog.Description>
+				No questions match your advanced filter settings. Try adjusting your filters or adding more questions.
+			</AlertDialog.Description>
+		</AlertDialog.Header>
+		<AlertDialog.Footer>
+			<AlertDialog.Action on:click={handleCancelNoMatchingQuestions} class="hover:scale-105 active:scale-95">OK</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
