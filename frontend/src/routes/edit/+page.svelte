@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
   import { onMount } from 'svelte';
-  import { getQuestions, searchQuestions, saveQuestion, updateQuestion, deleteQuestion } from '$lib/localStorage';
+  import { getQuestions, searchQuestions, saveQuestion, updateQuestion, deleteQuestion, importQuestions } from '$lib/localStorage';
   import type { QuizQuestion } from '$lib/types';
 	import { toast } from '$lib/components/ui/toast';
+  import * as AlertDialog from '$lib/components/ui/alert-dialog';
 
   let questions: QuizQuestion[] = [];
   let isLoading = false;
@@ -11,6 +12,9 @@
   let isAdding = false;
   let currentPage = 1;
   let questionsPerPage = 20;
+  let parsedQuestions: QuizQuestion[] = [];
+  let showImportDialog = false;
+  let showDeleteDialog = false;
 
    let sortBy = 'date';
   let sortDirection: 'asc' | 'desc' = 'desc';
@@ -29,7 +33,7 @@
     loadQuestions();
   });
 
-     function handleSort(field: string) {
+  function handleSort(field: string) {
     if (sortBy === field) {
       // Toggle direction if clicking the same field
       sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -71,6 +75,78 @@
     }
   }
 
+  function importQuestionsFromJson(event: Event) {
+    const input = event.target as HTMLInputElement;
+    
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      
+      // Check if it's a JSON file
+      if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+        toast.error('Please select a valid JSON file.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const content = e.target?.result as string;
+          parsedQuestions = JSON.parse(content);
+          
+          // Validate the structure of the imported questions
+          const isValid = Array.isArray(parsedQuestions) && 
+            parsedQuestions.every(q => 
+              q.id && 
+              q.question && 
+              Array.isArray(q.answers) && 
+              q.answers.every(a => 'text' in a && 'isCorrect' in a)
+            );
+          
+          if (!isValid) {
+            toast.error('The JSON file has an invalid format.');
+            return;
+          }
+          
+          // Show the import dialog for confirmation
+          showImportDialog = true;
+          
+        } catch (error) {
+          toast.error('Error parsing JSON file.');
+          console.error('Import error:', error);
+        }
+      };
+      
+      reader.readAsText(file);
+      
+      // Reset the input value to allow importing the same file again
+      input.value = '';
+    }
+  }
+  
+  function importQuestionsWithMode(mode: 'replace' | 'add') {
+    try {
+      importQuestions(parsedQuestions, mode);
+      
+      // Update UI
+      loadQuestions();
+      showImportDialog = false;
+      
+      // Show success message
+      if (mode === 'replace') {
+        toast.success(`Replaced all questions with ${parsedQuestions.length} imported questions.`);
+      } else {
+        toast.success(`Added ${parsedQuestions.length} questions to your collection.`);
+      }
+    } catch (error) {
+      toast.error('Error importing questions.');
+      console.error('Import error:', error);
+    }
+  }
+  
+  function closeImportDialog() {
+    showImportDialog = false;
+  }
+
   function loadQuestions() {
     isLoading = true;
     questions = searchTerm ? searchQuestions(searchTerm) : getQuestions();
@@ -107,10 +183,11 @@
   }
 
   function handleDelete(id: string) {
-    if (confirm('Are you sure you want to delete this question?')) {
       deleteQuestion(id);
       loadQuestions();
-    }
+      if (browser) {
+        toast.success(`Questions ${id} deleted successfully!`);
+      }
   }
 
   function cancelAdd() {
@@ -150,6 +227,9 @@
       }
       return;
     }    // Save or update the question
+
+    const currentLength = questions.length;
+
     if (editingQuestion) {
       updateQuestion({
         ...editingQuestion,
@@ -159,7 +239,7 @@
       });
     } else {
       saveQuestion({
-        id: `q${Date.now()}`,
+        id: `q${currentLength}`,
         question: questionText.trim(),
         answers: validAnswers,
         createdAt: Date.now(),
@@ -203,6 +283,71 @@
     const target = event.target as HTMLSelectElement;
     questionsPerPage = parseInt(target.value, 10);
     currentPage = 1;
+  }
+
+  function handleImportQuestions() {
+    // Validate JSON structure
+    try {
+      parsedQuestions.forEach(q => {
+        if (!q.question || !Array.isArray(q.answers)) {
+          throw new Error('Invalid question format');
+        }
+      });
+
+      const currentLength = questions.length;
+      
+      // Import each question
+      parsedQuestions.forEach(q => {
+        // Generate a unique ID and timestamps
+        const newQuestion: QuizQuestion = {
+          id: `q${currentLength}`,
+          question: q.question,
+          answers: q.answers,
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          stats: {
+            accuracy: 0,
+            attempts: 0,
+            correctCount: 0,
+            incorrectCount: 0,
+            lastUsed: 0
+          }
+        };
+        
+        // Save the question
+        saveQuestion(newQuestion);
+      });
+      
+      toast.success('Questions imported successfully!');
+      loadQuestions();
+    } catch (error) {
+      toast.error(`Import failed: ${error.message}`);
+    } finally {
+      showImportDialog = false;
+      parsedQuestions = [];
+    }
+  }
+
+  function handleFileUpload(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = e.target?.result;
+      if (typeof content === 'string') {
+        try {
+          // Parse the JSON content
+          const json = JSON.parse(content);
+          parsedQuestions = Array.isArray(json) ? json : [json];
+          
+          toast.success('File parsed successfully!');
+        } catch (error) {
+          toast.error('Failed to parse JSON file');
+        }
+      }
+    };
+    reader.readAsText(file);
   }
 
   $: filteredQuestions = questions;
@@ -254,15 +399,56 @@
 </script>
 <div class="flex flex-row items-center justify-between mb-6">
 <h1 class="mb-6 text-2xl font-bold">Quiz Question Manager</h1>
+<div>
   <button
-      class="cursor-pointer rounded-md border border-primary bg-blue-100 px-4 py-2 text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 hover:scale-105 active:scale-95"
+      class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 mr-2"
       on:click={exportQuestionsAsJson}
       disabled={questions.length === 0}
       title={questions.length === 0 ? 'No questions to export' : 'Export all questions as JSON'}
     >
       Export JSON
     </button>
+
+    <!-- Import button that triggers file input click -->
+    <button
+      class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
+      on:click={() => document.getElementById('fileInput')?.click()}
+      title="Import questions from a JSON file"
+    >
+      Import JSON
+    </button>
   </div>
+    <!-- Hidden file input for importing JSON files -->
+    <input 
+      type="file" 
+      id="fileInput" 
+      accept=".json,application/json" 
+      on:change={importQuestionsFromJson} 
+      class="hidden" 
+    />
+  </div>
+
+  <!-- Import Dialog -->
+  <AlertDialog.Root bind:open={showImportDialog}>
+    <AlertDialog.Content>
+      <AlertDialog.Header>
+        <AlertDialog.Title>Import Questions</AlertDialog.Title>
+        <AlertDialog.Description>
+          You're about to import {parsedQuestions.length} questions. How would you like to proceed?
+        </AlertDialog.Description>
+      </AlertDialog.Header>
+
+      <AlertDialog.Footer>
+        <AlertDialog.Cancel on:click={closeImportDialog}>Cancel</AlertDialog.Cancel>
+        <AlertDialog.Action class="bg-amber-600 hover:bg-amber-700" on:click={() => importQuestionsWithMode('add')}>
+          Add to Existing
+        </AlertDialog.Action>
+        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" on:click={() => importQuestionsWithMode('replace')}>
+          Replace All
+        </AlertDialog.Action>
+      </AlertDialog.Footer>
+    </AlertDialog.Content>
+  </AlertDialog.Root>
 
 <div class="mb-6 flex flex-wrap items-center gap-4">
   <div class="flex-1">
@@ -470,7 +656,7 @@
                 </button>
                 <button
                   class="cursor-pointer hover:scale-95 active:scale-105 rounded-md min-w-[70px] border bg-red-50 px-3 py-1 mt-2 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-                  on:click={() => handleDelete(question.id)}
+                  on:click={() => showDeleteDialog = true}
                 >
                   Delete
                 </button>
@@ -517,4 +703,24 @@
       </div>
     </div>
   {/if}
+{/if}
+
+{#if showDeleteDialog}
+  <AlertDialog.Root bind:open={showDeleteDialog}>
+    <AlertDialog.Content>
+      <AlertDialog.Header>
+        <AlertDialog.Title>Delete Question</AlertDialog.Title>
+        <AlertDialog.Description>
+          Are you sure you want to delete this question? This action cannot be undone.
+        </AlertDialog.Description>
+      </AlertDialog.Header>
+
+      <AlertDialog.Footer>
+        <AlertDialog.Cancel on:click={() => showDeleteDialog = false}>Cancel</AlertDialog.Cancel>
+        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" on:click={() => handleDelete(editingQuestion?.id || '')}>
+          Delete
+        </AlertDialog.Action>
+      </AlertDialog.Footer>
+    </AlertDialog.Content>
+  </AlertDialog.Root>
 {/if}

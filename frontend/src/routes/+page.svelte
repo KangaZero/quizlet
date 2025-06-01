@@ -21,7 +21,8 @@
     
     <div class="flex flex-col items-center rounded-lg border border-border bg-card p-6 shadow-sm">
       <h2 class="mb-2 text-xl font-bold">Endless Mode</h2>
-      <p class="mb-4 text-sm text-muted-foreground">Start with 3 lives and answer as many questions as you can</p>
+      <p class="mb-2 text-sm text-muted-foreground">Start with 3 lives and answer as many questions as you can</p>
+      <p class="mb-2 text-xs">* Actually 999 questions, but who’s counting?</p>
       <a href="{base}/quiz?mode=endless" class="mt-auto rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 border">Start Quiz</a>
     </div>
     

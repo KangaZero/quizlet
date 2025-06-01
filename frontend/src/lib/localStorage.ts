@@ -29,6 +29,35 @@ export function saveQuestion(question: QuizQuestion): void {
 	localStorage.setItem(QUESTIONS_KEY, JSON.stringify(questions));
 }
 
+export function importQuestions(questions: QuizQuestion[], mode: 'replace' | 'add'): void {
+	if (typeof localStorage === 'undefined') return;
+
+	// Ensure all imported questions have stats
+	const processedQuestions = questions.map((question) => {
+		// If the question doesn't have stats, initialize them
+		if (!question.stats) {
+			question.stats = {
+				accuracy: 0,
+				attempts: 0,
+				correctCount: 0,
+				incorrectCount: 0,
+				lastUsed: 0
+			};
+		}
+		return question;
+	});
+
+	// Either replace all questions or add to existing
+	if (mode === 'replace') {
+		localStorage.setItem(QUESTIONS_KEY, JSON.stringify(processedQuestions));
+	} else {
+		// Add to existing questions
+		const existingQuestions = getQuestions();
+		const mergedQuestions = [...existingQuestions, ...processedQuestions];
+		localStorage.setItem(QUESTIONS_KEY, JSON.stringify(mergedQuestions));
+	}
+}
+
 export function updateQuestion(question: QuizQuestion): void {
 	if (typeof localStorage === 'undefined') return;
 

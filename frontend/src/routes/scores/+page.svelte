@@ -36,6 +36,12 @@
     currentPage = page;
   }
   
+  function handleChangePerPage(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    itemsPerPage = parseInt(target.value, 10);
+    currentPage = 1; // Reset to first page when changing items per page
+  }
+
   function handleSort(field: string) {
     if (sortBy === field) {
       // Toggle direction if clicking the same field
@@ -89,9 +95,9 @@
   $: totalPages = Math.ceil(sortedScores.length / itemsPerPage);
 </script>
 
-<h1 class="mb-6 text-2xl font-bold">Quiz Scores</h1>
+<h1 class="mb-3 text-2xl font-bold">Quiz Scores</h1>
 
-<div class="mb-6 flex flex-wrap items-center justify-between gap-4">
+<div class="mb-3 flex flex-wrap items-center justify-between gap-4">
   <div>
     <label class="mr-2 text-sm font-medium">Filter by Mode:</label>
     <select
@@ -198,7 +204,23 @@
       </table>
     </div>
   </div>
-
+  <div class="flex flex-row justify-between mt-3">
+  <div class="mb-4 text-sm text-muted-foreground">
+    Showing {(currentPage - 1) * itemsPerPage + 1} to {Math.min(currentPage * itemsPerPage, sortedScores.length)} of {sortedScores.length} scores
+  </div>
+  <div>
+    <label class="mr-2 text-sm font-medium">Items per page:</label>
+    <select
+      class="rounded-md border border-input bg-background px-3 py-1 dark:bg-slate-600"
+      bind:value={itemsPerPage}
+    >
+      <option value={10}>10</option>
+      <option value={20}>20</option>
+      <option value={50}>50</option>
+      <option value={100}>100</option>
+    </select>
+  </div>
+</div>
   {#if totalPages > 1}
     <div class="mt-4 flex justify-center">
       <div class="flex items-center space-x-2">

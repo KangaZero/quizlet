@@ -4,9 +4,10 @@
 	import { theme, userName } from '$lib/stores';
 	import { initSampleQuestions} from '$lib/sampleData';
 	import Toaster from '$lib/components/ui/toast/toaster.svelte';
-	import { getUserSettings } from '$lib/localStorage';
+	import { getUserSettings, getQuestions } from '$lib/localStorage';
 
 	let { children } = $props();
+   const existingQuestions = getQuestions();
 	
 	// Initialize theme from localStorage
 	onMount(() => {
@@ -21,6 +22,13 @@
 		initSampleQuestions();
 	});
 
+	  function handleQuizClick(e) {
+    if (!$userName || $existingQuestions.length === 0) {
+      e.preventDefault();
+      // Optionally show a toast message explaining why it's disabled
+      toast.error('Please set your username in Settings and/or add questions in Edit');
+    }
+  }
 	// Update theme when it changes
 	$effect(() => {
 		if (typeof document !== 'undefined') {
@@ -37,7 +45,19 @@
 			<a href="/" class="text-lg font-bold">QuizMaster</a>
 			<nav class="ml-auto flex gap-6">
 				<a href="/" class="hover:text-primary">Home</a>
-				<a href="/quiz" class="hover:text-primary">Quiz</a>
+				  {#if $userName && $existingQuestions.length > 0}
+    <a href="/quiz" class="hover:text-primary">Quiz</a>
+  {:else}
+    <a 
+      href="/quiz" 
+      class="opacity-50 pointer-events-none cursor-not-allowed text-muted-foreground" 
+      aria-disabled="true"
+      on:click|preventDefault={handleQuizClick}
+      title="Please set your username in Settings first"
+    >
+      Quiz
+    </a>
+  {/if}
 				<a href="/edit" class="hover:text-primary">Edit</a>
 				<a href="/scores" class="hover:text-primary">Scores</a>
 				<a href="/settings" class="hover:text-primary">Settings</a>
