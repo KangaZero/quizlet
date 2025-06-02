@@ -4,12 +4,12 @@
 </script>
 
 <div class="flex min-h-[calc(100vh-10rem)] flex-col items-center justify-center text-center">
-  <h1 class="mb-4 text-4xl font-bold">Welcome to QuizMaster</h1>
+  <h1 class="mb-4 text-4xl font-bold">Welcome to Quizlet</h1>
   
   {#if $userName}
     <p class="mb-8 text-xl">Hello, {$userName}! Ready for a quiz challenge?</p>
   {:else}
-    <p class="mb-8 text-xl">Test your knowledge with our quiz challenges!</p>
+    <p class="mb-8 text-xl">Go to settings to add your name, or edit to add questions</p>
   {/if}
   
   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">

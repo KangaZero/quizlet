@@ -1,6 +1,6 @@
-# QuizMaster
+# Quizlet
 
-QuizMaster is a simple web-based quiz application built with SvelteKit. It allows users to take quizzes in various modes, create and manage their own quiz questions, and track their scores.
+Quizlet is a simple web-based quiz application built with SvelteKit. It allows users to take quizzes in various modes, create and manage their own quiz questions, and track their scores.
 
 ## Features
 

@@ -42,7 +42,7 @@
 <div class="min-h-screen bg-white dark:bg-slate-700 text-black dark:text-slate-300 transition-colors" data-theme={$theme}>
 	<header class="border-b border-border">
 		<div class="container mx-auto flex h-16 items-center px-4">
-			<a href="/" class="text-lg font-bold">QuizMaster</a>
+			<a href="/" class="text-lg font-bold">Quizlet</a>
 			<nav class="ml-auto flex gap-6">
 				<a href="/" class="hover:text-primary">Home</a>
 				  {#if $userName && $existingQuestions.length > 0}
