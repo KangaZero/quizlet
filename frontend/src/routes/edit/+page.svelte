@@ -229,6 +229,10 @@
 	}
 
 	function handleDelete(id: string) {
+		if (!id) {
+			toast.error("Couldn't delete question: No question ID provided");
+			return;
+		}
 		deleteQuestion(id);
 		loadQuestions();
 		if (browser) {
@@ -673,13 +677,19 @@
 							<td class="px-4 py-4 text-right">
 								<button
 									class="hover:bg-muted min-w-[70px] cursor-pointer rounded-md border px-3 py-1 text-sm hover:scale-95 active:scale-105"
-									onclick={() => startEdit(question)}
+									onclick={() => {
+										editingQuestion = question;
+										startEdit(question);
+									}}
 								>
 									Edit
 								</button>
 								<button
 									class="mt-2 min-w-[70px] cursor-pointer rounded-md border bg-red-50 px-3 py-1 text-sm text-red-600 hover:scale-95 hover:bg-red-100 active:scale-105 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-									onclick={() => (showDeleteDialog = true)}
+									onclick={() => {
+										editingQuestion = question; // Set the question to delete
+										showDeleteDialog = true;
+									}}
 								>
 									Delete
 								</button>

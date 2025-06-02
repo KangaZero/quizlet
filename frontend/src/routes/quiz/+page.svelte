@@ -3,7 +3,12 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { userName } from '$lib/stores';
-	import { getQuestions, getRandomQuestions, saveScore, updateQuestionStats } from '$lib/localStorage';
+	import {
+		getQuestions,
+		getRandomQuestions,
+		saveScore,
+		updateQuestionStats
+	} from '$lib/localStorage';
 	import type { QuizQuestion } from '$lib/types';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Accordion from '$lib/components/ui/accordion';
@@ -79,7 +84,7 @@
 	function startQuiz() {
 		// Initialize questions based on mode
 		const availableQuestions = getQuestions();
-  		let count = Math.min(availableQuestions.length, 10); // Default to available questions up to max of 10
+		let count = Math.min(availableQuestions.length, 10); // Default to available questions up to max of 10
 		let allowRepeats = false;
 
 		if (mode === 'endless') {
@@ -206,41 +211,41 @@
 		const remainingSeconds = seconds % 60;
 		return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
 	}
-	 function getPartialCorrectFeedback() {
-    const currentQuestion = questions[currentQuestionIndex];
-    const correctAnswerIndices = currentQuestion.answers
-      .map((answer, index) => (answer.isCorrect ? index : -1))
-      .filter((index) => index !== -1);
-    
-    // Count how many correct answers the user selected
-    const correctSelected = selectedAnswers.filter(index => 
-      correctAnswerIndices.includes(index)
-    ).length;
-    
-    // Count how many incorrect answers the user selected
-    const incorrectSelected = selectedAnswers.filter(index => 
-      !correctAnswerIndices.includes(index)
-    ).length;
-    
-    // Count how many correct answers were missed
-    const missedCorrect = correctAnswerIndices.length - correctSelected;
-    
-    let feedback = '';
-    
-    if (correctSelected > 0) {
-      feedback += `You got ${correctSelected} of ${correctAnswerIndices.length} correct. `;
-    }
-    
-    if (incorrectSelected > 0) {
-      feedback += `You selected ${incorrectSelected} incorrect option${incorrectSelected > 1 ? 's' : ''}. `;
-    }
-    
-    if (missedCorrect > 0) {
-      feedback += `You missed ${missedCorrect} correct option${missedCorrect > 1 ? 's' : ''}.`;
-    }
-    
-    return feedback;
-  }
+	function getPartialCorrectFeedback() {
+		const currentQuestion = questions[currentQuestionIndex];
+		const correctAnswerIndices = currentQuestion.answers
+			.map((answer, index) => (answer.isCorrect ? index : -1))
+			.filter((index) => index !== -1);
+
+		// Count how many correct answers the user selected
+		const correctSelected = selectedAnswers.filter((index) =>
+			correctAnswerIndices.includes(index)
+		).length;
+
+		// Count how many incorrect answers the user selected
+		const incorrectSelected = selectedAnswers.filter(
+			(index) => !correctAnswerIndices.includes(index)
+		).length;
+
+		// Count how many correct answers were missed
+		const missedCorrect = correctAnswerIndices.length - correctSelected;
+
+		let feedback = '';
+
+		if (correctSelected > 0) {
+			feedback += `You got ${correctSelected} of ${correctAnswerIndices.length} correct. `;
+		}
+
+		if (incorrectSelected > 0) {
+			feedback += `You selected ${incorrectSelected} incorrect option${incorrectSelected > 1 ? 's' : ''}. `;
+		}
+
+		if (missedCorrect > 0) {
+			feedback += `You missed ${missedCorrect} correct option${missedCorrect > 1 ? 's' : ''}.`;
+		}
+
+		return feedback;
+	}
 
 	function selectAnswer(answerIndex: number) {
 		// Get the current question and check how many correct answers it has
@@ -293,7 +298,9 @@
 				const noIncorrectSelected = selectedAnswers.every((index) =>
 					correctAnswerIndices.includes(index)
 				);
-				const someCorrectSelected = selectedAnswers.some(index => correctAnswerIndices.includes(index));
+				const someCorrectSelected = selectedAnswers.some((index) =>
+					correctAnswerIndices.includes(index)
+				);
 				if (allCorrectSelected && noIncorrectSelected) {
 					// All correct answers are selected and no incorrect ones
 					updateQuestionStats(currentQuestion.id, true);
@@ -393,46 +400,53 @@
 			selectedAnswers.length === correctAnswerIndices.length &&
 			correctAnswerIndices.every((index) => selectedAnswers.includes(index));
 
-			// Check if partially correct (some correct answers selected)
-    const someCorrectSelected = selectedAnswers.some(index => correctAnswerIndices.includes(index));
-    const someIncorrectSelected = selectedAnswers.some(index => !correctAnswerIndices.includes(index));
+		// Check if partially correct (some correct answers selected)
+		const someCorrectSelected = selectedAnswers.some((index) =>
+			correctAnswerIndices.includes(index)
+		);
+		const someIncorrectSelected = selectedAnswers.some(
+			(index) => !correctAnswerIndices.includes(index)
+		);
 		// Update question statistics
 		updateQuestionStats(currentQuestion.id, isAllCorrect);
 
 		if (isAllCorrect) {
-      score++;
-      lastAnswerCorrect = true;
-      answerFeedbackState = 'correct';
-    } else if (someCorrectSelected && (someIncorrectSelected || selectedAnswers.length < correctAnswerIndices.length)) {
-      // Partially correct - some correct answers but not all
-      lastAnswerCorrect = false; // Still counts as incorrect for scoring
-      answerFeedbackState = 'partial';
-    } else {
-      // Completely incorrect
-      lastAnswerCorrect = false;
-      answerFeedbackState = 'incorrect';
-      
-      if (mode === 'endless') {
-        lives--;
-        if (lives <= 0) {
-          setTimeout(finishQuiz, 1000);
-        }
-      }
-    }
+			score++;
+			lastAnswerCorrect = true;
+			answerFeedbackState = 'correct';
+		} else if (
+			someCorrectSelected &&
+			(someIncorrectSelected || selectedAnswers.length < correctAnswerIndices.length)
+		) {
+			// Partially correct - some correct answers but not all
+			lastAnswerCorrect = false; // Still counts as incorrect for scoring
+			answerFeedbackState = 'partial';
+		} else {
+			// Completely incorrect
+			lastAnswerCorrect = false;
+			answerFeedbackState = 'incorrect';
 
-    // Move to next question after a short delay
-    setTimeout(() => {
-      selectedAnswerIndex = null;
-      lastAnswerCorrect = null;
-      answerFeedbackState = null;
-      selectedAnswers = [];
+			if (mode === 'endless') {
+				lives--;
+				if (lives <= 0) {
+					setTimeout(finishQuiz, 1000);
+				}
+			}
+		}
 
-      // Don't increment in endless mode if out of lives
-      if (!(mode === 'endless' && lives <= 0)) {
-        moveToNextQuestion();
-      }
-    }, 1000);
-  }
+		// Move to next question after a short delay
+		setTimeout(() => {
+			selectedAnswerIndex = null;
+			lastAnswerCorrect = null;
+			answerFeedbackState = null;
+			selectedAnswers = [];
+
+			// Don't increment in endless mode if out of lives
+			if (!(mode === 'endless' && lives <= 0)) {
+				moveToNextQuestion();
+			}
+		}, 1000);
+	}
 
 	function moveToNextQuestion() {
 		if (currentQuestionIndex < questions.length - 1) {
@@ -724,48 +738,51 @@
 				Correct answers required: {getCurrentQuestion().answers.filter((a) => a.isCorrect).length}
 			</div>
 			<div class="mt-6 space-y-3">
-  {#each getCurrentQuestion().answers as answer, i}
-    <button
-      class="w-full rounded-md border px-4 py-2 text-left transition-colors flex justify-between items-center
+				{#each getCurrentQuestion().answers as answer, i}
+					<button
+						class="flex w-full items-center justify-between rounded-md border px-4 py-2 text-left transition-colors
         {getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1
-          ? selectedAnswers.includes(i)
-            ? answer.isCorrect && (answerFeedbackState === 'correct' || answerFeedbackState === 'partial')
-              ? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900/40'
-              : !answer.isCorrect && answerFeedbackState === 'partial'
-                ? 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900/40'
-                : 'border-blue-500 bg-blue-100 dark:border-blue-600 dark:bg-blue-900/40'
-            : answerFeedbackState === 'partial' && answer.isCorrect && !selectedAnswers.includes(i)
-              ? 'border-yellow-500 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900/30'
-              : 'border-border hover:bg-muted'
-          : selectedAnswerIndex === i
-            ? answer.isCorrect
-              ? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900'
-              : 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900'
-            : 'border-border hover:bg-muted'}"
-      onclick={() => selectAnswer(i)}
-      disabled={(getCurrentQuestion().answers.filter((a) => a.isCorrect).length === 1 && 
-                selectedAnswerIndex !== null) || 
-                answerFeedbackState !== null}
-    >
-      <span>{answer.text}</span>
-      <span>
-        {#if answerFeedbackState === 'partial'}
-          {#if answer.isCorrect && selectedAnswers.includes(i)}
-            <span class="text-green-600 dark:text-green-400">✓</span>
-          {:else if answer.isCorrect && !selectedAnswers.includes(i)}
-            <span class="text-yellow-600 dark:text-yellow-400">?</span>
-          {:else if !answer.isCorrect && selectedAnswers.includes(i)}
-            <span class="text-red-600 dark:text-red-400">✗</span>
-          {/if}
-        {:else if answerFeedbackState === 'correct' && selectedAnswers.includes(i)}
-          <span class="text-green-600 dark:text-green-400">✓</span>
-        {:else if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.includes(i)}
-          <span>✓</span>
-        {/if}
-      </span>
-    </button>
-  {/each}
-</div>
+							? selectedAnswers.includes(i)
+								? answer.isCorrect &&
+									(answerFeedbackState === 'correct' || answerFeedbackState === 'partial')
+									? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900/40'
+									: !answer.isCorrect && answerFeedbackState === 'partial'
+										? 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900/40'
+										: 'border-blue-500 bg-blue-100 dark:border-blue-600 dark:bg-blue-900/40'
+								: answerFeedbackState === 'partial' &&
+									  answer.isCorrect &&
+									  !selectedAnswers.includes(i)
+									? 'border-yellow-500 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900/30'
+									: 'border-border hover:bg-muted'
+							: selectedAnswerIndex === i
+								? answer.isCorrect
+									? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900'
+									: 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900'
+								: 'border-border hover:bg-muted'}"
+						onclick={() => selectAnswer(i)}
+						disabled={(getCurrentQuestion().answers.filter((a) => a.isCorrect).length === 1 &&
+							selectedAnswerIndex !== null) ||
+							answerFeedbackState !== null}
+					>
+						<span>{answer.text}</span>
+						<span>
+							{#if answerFeedbackState === 'partial'}
+								{#if answer.isCorrect && selectedAnswers.includes(i)}
+									<span class="text-green-600 dark:text-green-400">✓</span>
+								{:else if answer.isCorrect && !selectedAnswers.includes(i)}
+									<span class="text-yellow-600 dark:text-yellow-400">?</span>
+								{:else if !answer.isCorrect && selectedAnswers.includes(i)}
+									<span class="text-red-600 dark:text-red-400">✗</span>
+								{/if}
+							{:else if answerFeedbackState === 'correct' && selectedAnswers.includes(i)}
+								<span class="text-green-600 dark:text-green-400">✓</span>
+							{:else if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.includes(i)}
+								<span>✓</span>
+							{/if}
+						</span>
+					</button>
+				{/each}
+			</div>
 
 			{#if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.length > 0 && mode !== 'speedrun'}
 				<div class="mt-4 text-center">
@@ -779,22 +796,20 @@
 			{/if}
 
 			{#if answerFeedbackState !== null}
-  <div
-    class="mt-4 text-center font-semibold {
-      answerFeedbackState === 'correct'
-        ? 'text-green-600 dark:text-green-400'
-        : answerFeedbackState === 'partial'
-        ? 'text-yellow-600 dark:text-yellow-400'
-        : 'text-red-600 dark:text-red-400'
-    }"
-  >
-    {answerFeedbackState === 'correct'
-      ? 'Correct!'
-      : answerFeedbackState === 'partial'
-      ? 'Partially Correct! ' + getPartialCorrectFeedback()
-      : 'Incorrect!'}
-  </div>
-{/if}
+				<div
+					class="mt-4 text-center font-semibold {answerFeedbackState === 'correct'
+						? 'text-green-600 dark:text-green-400'
+						: answerFeedbackState === 'partial'
+							? 'text-yellow-600 dark:text-yellow-400'
+							: 'text-red-600 dark:text-red-400'}"
+				>
+					{answerFeedbackState === 'correct'
+						? 'Correct!'
+						: answerFeedbackState === 'partial'
+							? 'Partially Correct! ' + getPartialCorrectFeedback()
+							: 'Incorrect!'}
+				</div>
+			{/if}
 
 			<!-- Question Navigation -->
 			<div class="border-border mt-6 border-t pt-4">

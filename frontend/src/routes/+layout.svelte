@@ -1,10 +1,11 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
 	import { theme, userName, fontStyle } from '$lib/stores';
 	import { initSampleQuestions } from '$lib/sampleData';
 	import Toaster from '$lib/components/ui/toast/toaster.svelte';
-	
+
 	import { toast } from '$lib/components/ui/toast';
 	import { getUserSettings, getQuestions } from '$lib/localStorage';
 	export const prerender = true;
@@ -51,16 +52,31 @@
 </script>
 
 <div
-	class="min-h-screen bg-white text-black transition-colors dark:bg-slate-700 dark:text-slate-300"
+	class="bg-white text-black transition-colors dark:bg-slate-700 dark:text-slate-300"
 	data-theme={$theme}
 >
 	<header class="border-border border-b">
-		<div class="container mx-auto flex h-16 items-center px-4">
+		<div class="container mx-auto flex h-16 flex-col items-center px-4 md:flex-row">
 			<a href="/" class="text-lg font-bold">Quizlet</a>
-			<nav class="ml-auto flex gap-6">
-				<a href="/" class="hover:text-primary">Home</a>
+			<nav class="mx-auto flex gap-6 md:mx-0 md:ml-auto">
+				<a
+					href="/"
+					class="hover:text-primary transition-colors {$page.url.pathname === '/'
+						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
+						: ''}"
+				>
+					Home
+				</a>
+
 				{#if $userName && existingQuestions.length > 0}
-					<a href="/quiz" class="hover:text-primary">Quiz</a>
+					<a
+						href="/quiz"
+						class="hover:text-primary transition-colors {$page.url.pathname === '/quiz'
+							? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
+							: ''}"
+					>
+						Quiz
+					</a>
 				{:else}
 					<a
 						href="/quiz"
@@ -72,18 +88,42 @@
 						Quiz
 					</a>
 				{/if}
-				<a href="/edit" class="hover:text-primary">Edit</a>
-				<a href="/scores" class="hover:text-primary">Scores</a>
-				<a href="/settings" class="hover:text-primary">Settings</a>
+
+				<a
+					href="/edit"
+					class="hover:text-primary transition-colors {$page.url.pathname === '/edit'
+						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
+						: ''}"
+				>
+					Edit
+				</a>
+
+				<a
+					href="/scores"
+					class="hover:text-primary transition-colors {$page.url.pathname === '/scores'
+						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
+						: ''}"
+				>
+					Scores
+				</a>
+
+				<a
+					href="/settings"
+					class="hover:text-primary transition-colors {$page.url.pathname === '/settings'
+						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
+						: ''}"
+				>
+					Settings
+				</a>
 			</nav>
 		</div>
 	</header>
 
-	<main class="container mx-auto flex-grow overflow-y-auto p-4">
+	<main class="container mx-auto flex-grow p-4">
 		{@render children()}
 	</main>
 
-	<footer class="mt-8 border-t py-6">
+	<footer class="mt-auto border-t py-6 md:mt-8">
 		<div class="text-muted-foreground container mx-auto px-4 text-center text-sm">
 			<p>Quizlet by KangaZero &copy; {new Date().getFullYear()}</p>
 			<!-- <div class="flex justify-center mt-3">
