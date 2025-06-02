@@ -2,7 +2,7 @@
 	import { browser } from '$app/environment';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { toast } from '$lib/components/ui/toast';
-	import { theme, userName } from '$lib/stores';
+	import { theme, userName, fontStyle } from '$lib/stores';
 	import { getQuestions, getScores, saveUserSettings } from '$lib/localStorage';
 
 	let nameInput = $userName;
@@ -22,6 +22,34 @@
 				toast.success(`Theme changed to ${newTheme}!`);
 			}
 			return newTheme;
+		});
+	}
+
+	function toggleFont() {
+		fontStyle.update((currentFont) => {
+			const newFont = currentFont === 'normal' ? 'comic' : 'normal';
+
+			// Save to localStorage - you'll need to update your saveUserSettings function
+			saveUserSettings({
+				userName: $userName,
+				theme: $theme,
+				fontStyle: newFont
+			});
+
+			// Apply the font change
+			if (browser && document.body) {
+				if (newFont === 'comic') {
+					document.body.classList.add('comic-font');
+				} else {
+					document.body.classList.remove('comic-font');
+				}
+			}
+
+			if (browser) {
+				toast.success(`Font changed to ${newFont === 'comic' ? 'Comic Sans' : 'Normal'}!`);
+			}
+
+			return newFont;
 		});
 	}
 
@@ -80,6 +108,24 @@
 						<span
 							class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {$theme ===
 							'dark'
+								? 'translate-x-6'
+								: 'translate-x-1'}"
+						></span>
+					</button>
+				</label>
+				<label class="mt-6 flex items-center justify-between">
+					<span>Spice it up</span>
+					<button
+						class="relative inline-flex h-6 w-11 items-center rounded-full border bg-slate-400 transition-colors dark:bg-slate-800 {$fontStyle ===
+						'comic'
+							? 'bg-primary'
+							: ''}"
+						onclick={toggleFont}
+					>
+						<span class="sr-only">Toggle Font Style</span>
+						<span
+							class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {$fontStyle ===
+							'comic'
 								? 'translate-x-6'
 								: 'translate-x-1'}"
 						></span>

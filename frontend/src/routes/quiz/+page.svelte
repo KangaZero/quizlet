@@ -1,11 +1,12 @@
-<script lang="ts">	import { onMount } from 'svelte';
+<script lang="ts">
+	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { userName } from '$lib/stores';
-	import { getRandomQuestions, saveScore, updateQuestionStats } from '$lib/localStorage';
+	import { getQuestions, getRandomQuestions, saveScore, updateQuestionStats } from '$lib/localStorage';
 	import type { QuizQuestion } from '$lib/types';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
-import * as Accordion from "$lib/components/ui/accordion";
+	import * as Accordion from '$lib/components/ui/accordion';
 
 	let showNoQuestionsDialog = false;
 	let showNotEnoughQuestionsDialog = false;
@@ -29,14 +30,15 @@ import * as Accordion from "$lib/components/ui/accordion";
 	let lastAnswerCorrect: boolean | null = null;
 	let selectedAnswerIndex: number | null = null;
 	let selectedAnswers: number[] = [];
+	let answerFeedbackState: 'correct' | 'incorrect' | 'partial' | null = null;
 	let elapsedTime = 0;
-  // Advanced settings variables
-  let ageFilterUnit = 'days';
-  let ageFilterValue = '';
-  let accuracyMin = 0;
-  let accuracyMax = 100;
-  let showNoMatchingQuestionsDialog = false;
- 
+	// Advanced settings variables
+	let ageFilterUnit = 'days';
+	let ageFilterValue = '';
+	let accuracyMin = 0;
+	let accuracyMax = 100;
+	let showNoMatchingQuestionsDialog = false;
+
 	function startElapsedTimeTracking() {
 		if (elapsedTimeTimer) clearInterval(elapsedTimeTimer);
 
@@ -76,11 +78,12 @@ import * as Accordion from "$lib/components/ui/accordion";
 	});
 	function startQuiz() {
 		// Initialize questions based on mode
-		let count = 10; // Default for regular mode
+		const availableQuestions = getQuestions();
+  		let count = Math.min(availableQuestions.length, 10); // Default to available questions up to max of 10
 		let allowRepeats = false;
 
 		if (mode === 'endless') {
-			count = 100; // Large number for endless mode
+			count = 999; // Large number for endless mode
 			allowRepeats = true;
 		} else if (mode === 'speedrun') {
 			count = 50;
@@ -91,7 +94,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 		}
 
 		// Get all available questions
-		const allQuestions = getRandomQuestions(count, false);  // Don't apply repeats here, we'll do it in our filter
+		const allQuestions = getRandomQuestions(count, false); // Don't apply repeats here, we'll do it in our filter
 
 		if (allQuestions.length === 0) {
 			// Show the dialog instead of using alert()
@@ -100,9 +103,8 @@ import * as Accordion from "$lib/components/ui/accordion";
 		}
 
 		// Apply advanced filters in custom mode
-		const filteredQuestions = mode === 'custom' 
-			? applyAdvancedFilters(allQuestions, count, allowRepeats)
-			: allQuestions;
+		const filteredQuestions =
+			mode === 'custom' ? applyAdvancedFilters(allQuestions, count, allowRepeats) : allQuestions;
 
 		if (filteredQuestions.length === 0) {
 			// No questions match the filters
@@ -136,7 +138,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 	function handleCancelNoMatchingQuestions() {
 		showNoMatchingQuestionsDialog = false;
 	}
-	
+
 	function initQuiz() {
 		// Reset quiz state
 		currentQuestionIndex = 0;
@@ -148,7 +150,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 		isQuizStarted = true;
 		isQuizFinished = false;
 		startTime = Date.now();
-		
+
 		// Randomize the order of answers for all questions
 		questions = randomizeAnswerOrder(questions);
 
@@ -204,130 +206,181 @@ import * as Accordion from "$lib/components/ui/accordion";
 		const remainingSeconds = seconds % 60;
 		return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
 	}
+	 function getPartialCorrectFeedback() {
+    const currentQuestion = questions[currentQuestionIndex];
+    const correctAnswerIndices = currentQuestion.answers
+      .map((answer, index) => (answer.isCorrect ? index : -1))
+      .filter((index) => index !== -1);
+    
+    // Count how many correct answers the user selected
+    const correctSelected = selectedAnswers.filter(index => 
+      correctAnswerIndices.includes(index)
+    ).length;
+    
+    // Count how many incorrect answers the user selected
+    const incorrectSelected = selectedAnswers.filter(index => 
+      !correctAnswerIndices.includes(index)
+    ).length;
+    
+    // Count how many correct answers were missed
+    const missedCorrect = correctAnswerIndices.length - correctSelected;
+    
+    let feedback = '';
+    
+    if (correctSelected > 0) {
+      feedback += `You got ${correctSelected} of ${correctAnswerIndices.length} correct. `;
+    }
+    
+    if (incorrectSelected > 0) {
+      feedback += `You selected ${incorrectSelected} incorrect option${incorrectSelected > 1 ? 's' : ''}. `;
+    }
+    
+    if (missedCorrect > 0) {
+      feedback += `You missed ${missedCorrect} correct option${missedCorrect > 1 ? 's' : ''}.`;
+    }
+    
+    return feedback;
+  }
+
 	function selectAnswer(answerIndex: number) {
-  // Get the current question and check how many correct answers it has
-  const currentQuestion = questions[currentQuestionIndex];
-  const correctAnswersCount = currentQuestion.answers.filter((a) => a.isCorrect).length;
-  // For speedrun mode, handle multiple answers with brief visual feedback
-  if (mode === 'speedrun') {
-    if (correctAnswersCount === 1) {
-      // For single correct answer questions
-      selectedAnswerIndex = answerIndex;
-      const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
+		// Get the current question and check how many correct answers it has
+		const currentQuestion = questions[currentQuestionIndex];
+		const correctAnswersCount = currentQuestion.answers.filter((a) => a.isCorrect).length;
+		// For speedrun mode, handle multiple answers with brief visual feedback
+		if (mode === 'speedrun') {
+			if (correctAnswersCount === 1) {
+				// For single correct answer questions
+				selectedAnswerIndex = answerIndex;
+				const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
 
-      // Update question statistics
-      updateQuestionStats(currentQuestion.id, isCorrect);
+				// Update question statistics
+				updateQuestionStats(currentQuestion.id, isCorrect);
 
-      if (isCorrect) {
-        score++;
-        lastAnswerCorrect = true;
-      } else {
-        lastAnswerCorrect = false;
-      }
+				if (isCorrect) {
+					score++;
+					lastAnswerCorrect = true;
+					answerFeedbackState = 'correct';
+				} else {
+					lastAnswerCorrect = false;
+					answerFeedbackState = 'incorrect';
+				}
 
-      // Short delay to show feedback (green/red) then move to next question
-      setTimeout(() => {
-        selectedAnswerIndex = null;
-        lastAnswerCorrect = null;
-        moveToNextQuestion();
-      }, 300); // Very short delay for visual feedback in speedrun mode
-      return;
-    } else {
-      // For multiple correct answers in speedrun mode
-      // Toggle the selection
-      if (selectedAnswers.includes(answerIndex)) {
-        selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
-      } else {
-        selectedAnswers = [...selectedAnswers, answerIndex];
-      }
+				// Short delay to show feedback (green/red) then move to next question
+				setTimeout(() => {
+					selectedAnswerIndex = null;
+					lastAnswerCorrect = null;
+					answerFeedbackState = null;
+					moveToNextQuestion();
+				}, 1000); // Very short delay for visual feedback in speedrun mode
+				return;
+			} else {
+				// For multiple correct answers in speedrun mode
+				// Toggle the selection
+				if (selectedAnswers.includes(answerIndex)) {
+					selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
+				} else {
+					selectedAnswers = [...selectedAnswers, answerIndex];
+				}
 
-      // If all correct answers are selected (and only correct ones), move to next question
-      const correctAnswerIndices = currentQuestion.answers
-        .map((answer, index) => (answer.isCorrect ? index : -1))
-        .filter((index) => index !== -1);
-        
-      const allCorrectSelected = correctAnswerIndices.every(index => selectedAnswers.includes(index));
-      const noIncorrectSelected = selectedAnswers.every(index => correctAnswerIndices.includes(index));
-        if (allCorrectSelected && noIncorrectSelected) {
-        // All correct answers are selected and no incorrect ones
-        updateQuestionStats(currentQuestion.id, true);
-        score++;
-        lastAnswerCorrect = true;
-        setTimeout(() => {
-          lastAnswerCorrect = null;
-          selectedAnswers = [];
-          moveToNextQuestion();
-        }, 300);
-      } else if (selectedAnswers.length >= correctAnswersCount) {
-        // User has selected enough answers, but they're wrong
-        updateQuestionStats(currentQuestion.id, false);
-        lastAnswerCorrect = false;
-        setTimeout(() => {
-          lastAnswerCorrect = null;
-          selectedAnswers = [];
-          moveToNextQuestion();
-        }, 300);
-      }
-      return;
-    }
-  }
+				// If all correct answers are selected (and only correct ones), move to next question
+				const correctAnswerIndices = currentQuestion.answers
+					.map((answer, index) => (answer.isCorrect ? index : -1))
+					.filter((index) => index !== -1);
 
-  // Regular behavior for other modes
-  
-  // If we already have an answer selected and this is a single-answer question, return
-  if (correctAnswersCount === 1 && selectedAnswerIndex !== null) return;
+				const allCorrectSelected = correctAnswerIndices.every((index) =>
+					selectedAnswers.includes(index)
+				);
+				const noIncorrectSelected = selectedAnswers.every((index) =>
+					correctAnswerIndices.includes(index)
+				);
+				const someCorrectSelected = selectedAnswers.some(index => correctAnswerIndices.includes(index));
+				if (allCorrectSelected && noIncorrectSelected) {
+					// All correct answers are selected and no incorrect ones
+					updateQuestionStats(currentQuestion.id, true);
+					score++;
+					lastAnswerCorrect = true;
+					answerFeedbackState = 'correct';
+					setTimeout(() => {
+						lastAnswerCorrect = null;
+						answerFeedbackState = null;
+						selectedAnswers = [];
+						moveToNextQuestion();
+					}, 500);
+				} else if (selectedAnswers.length >= correctAnswersCount) {
+					// User has selected enough answers, but they're wrong
+					updateQuestionStats(currentQuestion.id, false);
+					lastAnswerCorrect = false;
+					answerFeedbackState = someCorrectSelected ? 'partial' : 'incorrect';
+					setTimeout(() => {
+						lastAnswerCorrect = null;
+						answerFeedbackState = null;
+						selectedAnswers = [];
+						moveToNextQuestion();
+					}, 500);
+				}
+				return;
+			}
+		}
 
-  // For multiple correct answers, toggle selection
-  if (correctAnswersCount > 1) {
-    // If answer is already selected, deselect it
-    if (selectedAnswers.includes(answerIndex)) {
-      selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
-    } else {
-      // Otherwise, add it to the selected answers
-      selectedAnswers = [...selectedAnswers, answerIndex];
-    }
+		// Regular behavior for other modes
 
-    // Don't proceed to automatic next question yet for multiple answer questions
-    return;
-  }
-  
-  // For single correct answer questions, continue with original behavior
-  selectedAnswerIndex = answerIndex;
-  const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
+		// If we already have an answer selected and this is a single-answer question, return
+		if (correctAnswersCount === 1 && selectedAnswerIndex !== null) return;
 
-  // Update question statistics
-  updateQuestionStats(currentQuestion.id, isCorrect);
+		// For multiple correct answers, toggle selection
+		if (correctAnswersCount > 1) {
+			// If answer is already selected, deselect it
+			if (selectedAnswers.includes(answerIndex)) {
+				selectedAnswers = selectedAnswers.filter((i) => i !== answerIndex);
+			} else {
+				// Otherwise, add it to the selected answers
+				selectedAnswers = [...selectedAnswers, answerIndex];
+			}
 
-  if (isCorrect) {
-    score++;
-    lastAnswerCorrect = true;
-  } else {
-    if (mode === 'endless') {
-      lives--;
+			// Don't proceed to automatic next question yet for multiple answer questions
+			return;
+		}
 
-      if (lives <= 0) {
-        // In endless mode, run out of lives ends the quiz
-        setTimeout(finishQuiz, 1500);
-      }
-    }
+		// For single correct answer questions, continue with original behavior
+		selectedAnswerIndex = answerIndex;
+		const isCorrect = currentQuestion.answers[answerIndex].isCorrect;
 
-    lastAnswerCorrect = false;
-  }
+		// Update question statistics
+		updateQuestionStats(currentQuestion.id, isCorrect);
 
-  const delayBeforeNextQuestion = mode === 'speedrun' ? 0 : 1500;
+		if (isCorrect) {
+			score++;
+			lastAnswerCorrect = true;
+			answerFeedbackState = 'correct';
+		} else {
+			if (mode === 'endless') {
+				lives--;
 
-  // Move to next question after a short delay
-  setTimeout(() => {
-    selectedAnswerIndex = null;
-    lastAnswerCorrect = null;
-    selectedAnswers = [];
+				if (lives <= 0) {
+					// In endless mode, run out of lives ends the quiz
+					setTimeout(finishQuiz, 1000);
+				}
+			}
 
-    // Don't increment in endless mode if out of lives
-    if (!(mode === 'endless' && lives <= 0)) {
-      moveToNextQuestion();
-    }
-  }, delayBeforeNextQuestion);
-}
+			lastAnswerCorrect = false;
+			answerFeedbackState = 'incorrect';
+		}
+
+		const delayBeforeNextQuestion = mode === 'speedrun' ? 0 : 1000;
+
+		// Move to next question after a short delay
+		setTimeout(() => {
+			selectedAnswerIndex = null;
+			lastAnswerCorrect = null;
+			answerFeedbackState = null;
+			selectedAnswers = [];
+
+			// Don't increment in endless mode if out of lives
+			if (!(mode === 'endless' && lives <= 0)) {
+				moveToNextQuestion();
+			}
+		}, delayBeforeNextQuestion);
+	}
 
 	// Handle submission for multiple correct answer questions
 	function submitMultipleAnswers() {
@@ -336,41 +389,50 @@ import * as Accordion from "$lib/components/ui/accordion";
 			.map((answer, index) => (answer.isCorrect ? index : -1))
 			.filter((index) => index !== -1);
 		// Check if selected answers match exactly with correct answers
-		const isCorrect =
+		const isAllCorrect =
 			selectedAnswers.length === correctAnswerIndices.length &&
 			correctAnswerIndices.every((index) => selectedAnswers.includes(index));
-			
+
+			// Check if partially correct (some correct answers selected)
+    const someCorrectSelected = selectedAnswers.some(index => correctAnswerIndices.includes(index));
+    const someIncorrectSelected = selectedAnswers.some(index => !correctAnswerIndices.includes(index));
 		// Update question statistics
-		updateQuestionStats(currentQuestion.id, isCorrect);
+		updateQuestionStats(currentQuestion.id, isAllCorrect);
 
-		if (isCorrect) {
-			score++;
-			lastAnswerCorrect = true;
-		} else {
-			if (mode === 'endless') {
-				lives--;
+		if (isAllCorrect) {
+      score++;
+      lastAnswerCorrect = true;
+      answerFeedbackState = 'correct';
+    } else if (someCorrectSelected && (someIncorrectSelected || selectedAnswers.length < correctAnswerIndices.length)) {
+      // Partially correct - some correct answers but not all
+      lastAnswerCorrect = false; // Still counts as incorrect for scoring
+      answerFeedbackState = 'partial';
+    } else {
+      // Completely incorrect
+      lastAnswerCorrect = false;
+      answerFeedbackState = 'incorrect';
+      
+      if (mode === 'endless') {
+        lives--;
+        if (lives <= 0) {
+          setTimeout(finishQuiz, 1000);
+        }
+      }
+    }
 
-				if (lives <= 0) {
-					// In endless mode, run out of lives ends the quiz
-					setTimeout(finishQuiz, 1500);
-				}
-			}
+    // Move to next question after a short delay
+    setTimeout(() => {
+      selectedAnswerIndex = null;
+      lastAnswerCorrect = null;
+      answerFeedbackState = null;
+      selectedAnswers = [];
 
-			lastAnswerCorrect = false;
-		}
-
-		// Move to next question after a short delay
-		setTimeout(() => {
-			selectedAnswerIndex = null;
-			lastAnswerCorrect = null;
-			selectedAnswers = [];
-
-			// Don't increment in endless mode if out of lives
-			if (!(mode === 'endless' && lives <= 0)) {
-				moveToNextQuestion();
-			}
-		}, 1500);
-	}
+      // Don't increment in endless mode if out of lives
+      if (!(mode === 'endless' && lives <= 0)) {
+        moveToNextQuestion();
+      }
+    }, 1000);
+  }
 
 	function moveToNextQuestion() {
 		if (currentQuestionIndex < questions.length - 1) {
@@ -441,67 +503,73 @@ import * as Accordion from "$lib/components/ui/accordion";
 
 	// Function to randomize the order of answers for all questions
 	function randomizeAnswerOrder(questionList: QuizQuestion[]): QuizQuestion[] {
-		return questionList.map(question => {
+		return questionList.map((question) => {
 			// Create a deep copy of the question to avoid modifying the original
 			const questionCopy = JSON.parse(JSON.stringify(question));
-			
+
 			// Shuffle the answers array
 			const shuffledAnswers = [...questionCopy.answers].sort(() => Math.random() - 0.5);
 			questionCopy.answers = shuffledAnswers;
-			
+
 			return questionCopy;
 		});
 	}
 
 	// Function to filter questions based on advanced settings
-	function applyAdvancedFilters(allQuestions: QuizQuestion[], count: number, allowRepeats: boolean) {
+	function applyAdvancedFilters(
+		allQuestions: QuizQuestion[],
+		count: number,
+		allowRepeats: boolean
+	) {
 		let filteredQuestions = [...allQuestions];
-		
+
 		// Apply age filter if set
 		if (ageFilterValue && !isNaN(Number(ageFilterValue))) {
 			const now = Date.now();
 			let timeThreshold = now;
-			
+
 			// Calculate the threshold time based on the unit
 			switch (ageFilterUnit) {
 				case 'minutes':
-					timeThreshold = now - (Number(ageFilterValue) * 60 * 1000);
+					timeThreshold = now - Number(ageFilterValue) * 60 * 1000;
 					break;
 				case 'hours':
-					timeThreshold = now - (Number(ageFilterValue) * 60 * 60 * 1000);
+					timeThreshold = now - Number(ageFilterValue) * 60 * 60 * 1000;
 					break;
 				case 'days':
 				default:
-					timeThreshold = now - (Number(ageFilterValue) * 24 * 60 * 60 * 1000);
+					timeThreshold = now - Number(ageFilterValue) * 24 * 60 * 60 * 1000;
 			}
-			
+
 			// Filter questions based on the updatedAt or createdAt time
-			filteredQuestions = filteredQuestions.filter(q => 
-				(q.updatedAt || q.createdAt) >= timeThreshold
+			filteredQuestions = filteredQuestions.filter(
+				(q) => (q.updatedAt || q.createdAt) >= timeThreshold
 			);
 		}
-		
+
 		// Apply accuracy filter if set
 		if (accuracyMin > 0 || accuracyMax < 100) {
-			filteredQuestions = filteredQuestions.filter(q => {
+			filteredQuestions = filteredQuestions.filter((q) => {
 				// If the question has never been attempted, include it regardless of accuracy filter
 				if (!q.stats || q.stats.attempts === 0) return true;
-				
+
 				const accuracyPercentage = q.stats.accuracy * 100;
 				return accuracyPercentage >= accuracyMin && accuracyPercentage <= accuracyMax;
 			});
 		}
-		
+
 		// If we need more questions than what's available and repeats are allowed, repeat questions
 		if (allowRepeats && filteredQuestions.length < count && filteredQuestions.length > 0) {
 			const originalLength = filteredQuestions.length;
-			
+
 			// Repeat questions until we have enough
 			while (filteredQuestions.length < count) {
-				filteredQuestions.push(...filteredQuestions.slice(0, Math.min(originalLength, count - filteredQuestions.length)));
+				filteredQuestions.push(
+					...filteredQuestions.slice(0, Math.min(originalLength, count - filteredQuestions.length))
+				);
 			}
 		}
-		
+
 		// Shuffle the questions
 		return filteredQuestions.sort(() => Math.random() - 0.5).slice(0, count);
 	}
@@ -528,74 +596,78 @@ import * as Accordion from "$lib/components/ui/accordion";
 				<input type="checkbox" class="mr-2" bind:checked={customAllowRepeats} />
 				<span>Allow repeating questions</span>
 			</label>
-		</div>    <Accordion.Root>
-  <Accordion.Item value="item-1">
-    <Accordion.Trigger>Advanced settings</Accordion.Trigger>
-    <Accordion.Content>
-      <div class="space-y-4 py-2">
-        <!-- Age filter section -->
-        <div>
-          <label class="mb-2 block text-sm font-medium">Show questions not older than:</label>
-          <div class="flex items-center gap-2">
-            <input
-              type="number"
-              min="0"
-              class="border-input bg-background w-1/2 rounded-md border px-3 py-2"
-              bind:value={ageFilterValue}
-              placeholder="Enter value"
-            />
-            <select 
-              class="border-input dark:bg-slate-600  w-1/2 rounded-md border px-3 py-2"
-              bind:value={ageFilterUnit}
-            >
-              <option value="minutes">Minutes</option>
-              <option value="hours">Hours</option>
-              <option value="days">Days</option>
-            </select>
-          </div>
-          <p class="mt-1 text-xs text-muted-foreground">
-            Leave empty to include questions of any age
-          </p>
-        </div>
-        
-        <!-- Accuracy range section -->
-        <div>
-          <label class="mb-2 block text-sm font-medium">
-            Accuracy range: {accuracyMin}% - {accuracyMax}%
-          </label>
-          <div class="space-y-2">
-            <div>
-              <span class="text-xs">Min: {accuracyMin}%</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                class="w-full"
-                bind:value={accuracyMin}
-              />
-            </div>
-            <div>
-              <span class="text-xs">Max: {accuracyMax}%</span>
-              <input
-                type="range"
-                min="0"
-                max="100"
-                step="5"
-                class="w-full"
-                bind:value={accuracyMax}
-              />
-            </div>
-          </div>
-          <p class="mt-1 text-xs text-muted-foreground">
-            Questions with no attempts will always be included
-          </p>
-        </div>
-      </div>
-    </Accordion.Content>
-  </Accordion.Item>
-</Accordion.Root>
+		</div>
+		<Accordion.Root>
+			<Accordion.Item value="item-1">
+				<Accordion.Trigger>Advanced settings</Accordion.Trigger>
+				<Accordion.Content>
+					<div class="space-y-4 py-2">
+						<!-- Age filter section -->
+						<div>
+							<label class="mb-2 block text-sm font-medium">Show questions not older than:</label>
+							<div class="flex items-center gap-2">
+								<input
+									type="number"
+									min="0"
+									class="border-input bg-background w-1/2 rounded-md border px-3 py-2"
+									bind:value={ageFilterValue}
+									placeholder="Enter value"
+									oninput={(e) => {
+										// Remove non-numeric characters
+										e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '');
+									}}
+								/>
+								<select
+									class="border-input w-1/2 rounded-md border px-3 py-2 dark:bg-slate-600"
+									bind:value={ageFilterUnit}
+								>
+									<option value="minutes">Minutes</option>
+									<option value="hours">Hours</option>
+									<option value="days">Days</option>
+								</select>
+							</div>
+							<p class="text-muted-foreground mt-1 text-xs">
+								Leave empty to include questions of any age
+							</p>
+						</div>
 
+						<!-- Accuracy range section -->
+						<div>
+							<label class="mb-2 block text-sm font-medium">
+								Accuracy range: {accuracyMin}% - {accuracyMax}%
+							</label>
+							<div class="space-y-2">
+								<div>
+									<span class="text-xs">Min: {accuracyMin}%</span>
+									<input
+										type="range"
+										min="0"
+										max="100"
+										step="5"
+										class="w-full"
+										bind:value={accuracyMin}
+									/>
+								</div>
+								<div>
+									<span class="text-xs">Max: {accuracyMax}%</span>
+									<input
+										type="range"
+										min="0"
+										max="100"
+										step="5"
+										class="w-full"
+										bind:value={accuracyMax}
+									/>
+								</div>
+							</div>
+							<p class="text-muted-foreground mt-1 text-xs">
+								Questions with no attempts will always be included
+							</p>
+						</div>
+					</div>
+				</Accordion.Content>
+			</Accordion.Item>
+		</Accordion.Root>
 
 		<button
 			onclick={startQuiz}
@@ -619,7 +691,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 									? 'animate-pulse text-red-600 dark:text-red-500'
 									: 'text-gray-300 dark:text-gray-600'}"
 							>
-								❤️
+								{i < lives ? '❤️' : '🤍'}
 							</span>
 						{/each}
 					</span>
@@ -652,29 +724,48 @@ import * as Accordion from "$lib/components/ui/accordion";
 				Correct answers required: {getCurrentQuestion().answers.filter((a) => a.isCorrect).length}
 			</div>
 			<div class="mt-6 space-y-3">
-				{#each getCurrentQuestion().answers as answer, i}
-					<button
-						class="w-full rounded-md border px-4 py-2 text-left transition-colors
-              {getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1
-							? selectedAnswers.includes(i)
-								? 'border-blue-500 bg-blue-100 dark:border-blue-600 dark:bg-blue-900/40'
-								: 'border-border hover:bg-muted'
-							: selectedAnswerIndex === i
-								? answer.isCorrect
-									? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900'
-									: 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900'
-								: 'border-border hover:bg-muted'}"
-						onclick={() => selectAnswer(i)}
-						disabled={getCurrentQuestion().answers.filter((a) => a.isCorrect).length === 1 &&
-							selectedAnswerIndex !== null}
-					>
-						{answer.text}
-						{#if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.includes(i)}
-							<span class="float-right">✓</span>
-						{/if}
-					</button>
-				{/each}
-			</div>
+  {#each getCurrentQuestion().answers as answer, i}
+    <button
+      class="w-full rounded-md border px-4 py-2 text-left transition-colors flex justify-between items-center
+        {getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1
+          ? selectedAnswers.includes(i)
+            ? answer.isCorrect && (answerFeedbackState === 'correct' || answerFeedbackState === 'partial')
+              ? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900/40'
+              : !answer.isCorrect && answerFeedbackState === 'partial'
+                ? 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900/40'
+                : 'border-blue-500 bg-blue-100 dark:border-blue-600 dark:bg-blue-900/40'
+            : answerFeedbackState === 'partial' && answer.isCorrect && !selectedAnswers.includes(i)
+              ? 'border-yellow-500 bg-yellow-100 dark:border-yellow-600 dark:bg-yellow-900/30'
+              : 'border-border hover:bg-muted'
+          : selectedAnswerIndex === i
+            ? answer.isCorrect
+              ? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900'
+              : 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900'
+            : 'border-border hover:bg-muted'}"
+      onclick={() => selectAnswer(i)}
+      disabled={(getCurrentQuestion().answers.filter((a) => a.isCorrect).length === 1 && 
+                selectedAnswerIndex !== null) || 
+                answerFeedbackState !== null}
+    >
+      <span>{answer.text}</span>
+      <span>
+        {#if answerFeedbackState === 'partial'}
+          {#if answer.isCorrect && selectedAnswers.includes(i)}
+            <span class="text-green-600 dark:text-green-400">✓</span>
+          {:else if answer.isCorrect && !selectedAnswers.includes(i)}
+            <span class="text-yellow-600 dark:text-yellow-400">?</span>
+          {:else if !answer.isCorrect && selectedAnswers.includes(i)}
+            <span class="text-red-600 dark:text-red-400">✗</span>
+          {/if}
+        {:else if answerFeedbackState === 'correct' && selectedAnswers.includes(i)}
+          <span class="text-green-600 dark:text-green-400">✓</span>
+        {:else if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.includes(i)}
+          <span>✓</span>
+        {/if}
+      </span>
+    </button>
+  {/each}
+</div>
 
 			{#if getCurrentQuestion().answers.filter((a) => a.isCorrect).length > 1 && selectedAnswers.length > 0 && mode !== 'speedrun'}
 				<div class="mt-4 text-center">
@@ -687,15 +778,23 @@ import * as Accordion from "$lib/components/ui/accordion";
 				</div>
 			{/if}
 
-			{#if lastAnswerCorrect !== null}
-				<div
-					class="mt-4 text-center font-semibold {lastAnswerCorrect
-						? 'text-green-600 dark:text-green-400'
-						: 'text-red-600 dark:text-red-400'}"
-				>
-					{lastAnswerCorrect ? 'Correct!' : 'Incorrect!'}
-				</div>
-			{/if}
+			{#if answerFeedbackState !== null}
+  <div
+    class="mt-4 text-center font-semibold {
+      answerFeedbackState === 'correct'
+        ? 'text-green-600 dark:text-green-400'
+        : answerFeedbackState === 'partial'
+        ? 'text-yellow-600 dark:text-yellow-400'
+        : 'text-red-600 dark:text-red-400'
+    }"
+  >
+    {answerFeedbackState === 'correct'
+      ? 'Correct!'
+      : answerFeedbackState === 'partial'
+      ? 'Partially Correct! ' + getPartialCorrectFeedback()
+      : 'Incorrect!'}
+  </div>
+{/if}
 
 			<!-- Question Navigation -->
 			<div class="border-border mt-6 border-t pt-4">
@@ -761,7 +860,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 									<button
 										class="h-8 w-8 rounded-full text-sm
                       {currentQuestionIndex === i
-											? 'font-bold text-green-400 dark:text-green-600 underline'
+											? 'font-bold text-green-400 underline dark:text-green-600'
 											: 'bg-muted hover:bg-muted/80'}"
 										onclick={() => moveToQuestion(i)}
 										disabled={selectedAnswerIndex !== null ||
@@ -799,7 +898,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 							currentQuestionIndex === questions.length - 1 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
-						 lastAnswerCorrect !== null
+							lastAnswerCorrect !== null
 						)
 							? 'hover:scale-105 active:scale-95'
 							: ''}"
@@ -807,7 +906,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 						disabled={currentQuestionIndex === questions.length - 1 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
-						 lastAnswerCorrect !== null}
+							lastAnswerCorrect !== null}
 					>
 						Next
 					</button>
@@ -882,8 +981,14 @@ import * as Accordion from "$lib/components/ui/accordion";
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel onclick={handleCancelNoQuestions} class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleGoToEdit} class="text-sm text-green-400 hover:underline dark:text-green-600">Add Questions</AlertDialog.Action>
+			<AlertDialog.Cancel onclick={handleCancelNoQuestions} class="hover:scale-105 active:scale-95"
+				>Cancel</AlertDialog.Cancel
+			>
+			<AlertDialog.Action
+				onclick={handleGoToEdit}
+				class="text-sm text-green-400 hover:underline dark:text-green-600"
+				>Add Questions</AlertDialog.Action
+			>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
@@ -893,11 +998,15 @@ import * as Accordion from "$lib/components/ui/accordion";
 		<AlertDialog.Header>
 			<AlertDialog.Title>No Matching Questions</AlertDialog.Title>
 			<AlertDialog.Description>
-				No questions match your advanced filter settings. Try adjusting your filters or adding more questions.
+				No questions match your advanced filter settings. Try adjusting your filters or adding more
+				questions.
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Action onclick={handleCancelNoMatchingQuestions} class="hover:scale-105 active:scale-95">OK</AlertDialog.Action>
+			<AlertDialog.Action
+				onclick={handleCancelNoMatchingQuestions}
+				class="hover:scale-105 active:scale-95">OK</AlertDialog.Action
+			>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

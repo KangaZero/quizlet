@@ -1,4 +1,4 @@
-import type { QuizQuestion, QuizScore } from './types';
+import type { QuizQuestion, QuizScore, UserSettings } from './types';
 
 // Quiz Questions Storage
 export const QUESTIONS_KEY = 'quizQuestions';
@@ -160,16 +160,12 @@ export function getRandomQuestions(count: number, allowRepeats = false): QuizQue
 }
 
 export const USER_SETTINGS = 'userSettings';
-export interface UserSettings {
-	theme: 'light' | 'dark';
-	userName: string;
-}
 
 export function getUserSettings(): UserSettings {
 	if (typeof localStorage === 'undefined') return { theme: 'light', userName: '' };
 
 	const settings = localStorage.getItem(USER_SETTINGS);
-	return settings ? JSON.parse(settings) : { theme: 'light', userName: '' };
+	return settings ? JSON.parse(settings) : { theme: 'light', userName: '', fontStyle: 'normal' };
 }
 
 export function saveUserSettings(settings: UserSettings): void {

@@ -5,17 +5,20 @@ Quizlet is a simple web-based quiz application built with SvelteKit. It allows u
 ## Features
 
 - **Multiple Quiz Modes**
+
   - **Regular Mode**: 10 unique questions with a 5-minute time limit
   - **Endless Mode**: Answer as many questions as possible with 3 lives
   - **Custom Mode**: Set your own number of questions and whether they can repeat
   - **Speedrun Mode**: 50 unique questions with time tracking
 
 - **Question Management**
+
   - Create, edit, and delete quiz questions
   - Search and filter questions
   - Pagination to handle large collections of questions
 
 - **Score Tracking**
+
   - View your quiz history
   - Sort scores by date, score, accuracy, or time
   - Filter scores by quiz mode
@@ -28,6 +31,7 @@ Quizlet is a simple web-based quiz application built with SvelteKit. It allows u
 ## Data Storage
 
 All quiz data (questions and scores) is stored in the browser's localStorage. This means:
+
 - Your data remains private and stays on your device
 - No server is required to run the application
 - Your data persists between sessions on the same device

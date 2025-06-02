@@ -5,7 +5,7 @@ export interface QuizQuestion {
 		text: string;
 		isCorrect: boolean;
 	}[];
-	createdAt: number; 
+	createdAt: number;
 	updatedAt: number;
 	stats: {
 		accuracy: number; // percentage
@@ -13,7 +13,7 @@ export interface QuizQuestion {
 		correctCount: number;
 		incorrectCount: number;
 		lastUsed: number; // timestamp of last use
-	}
+	};
 }
 
 export interface QuizScore {
@@ -28,4 +28,10 @@ export interface QuizScore {
 		questionCount?: number;
 		allowRepeats?: boolean;
 	};
+}
+
+export interface UserSettings {
+	theme: 'light' | 'dark';
+	userName: string;
+	fontStyle?: 'normal' | 'comic'; // Optional font style for gigachad mode
 }
