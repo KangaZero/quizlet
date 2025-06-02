@@ -91,28 +91,34 @@
       reader.onload = (e) => {
         try {
           const content = e.target?.result as string;
-          parsedQuestions = JSON.parse(content);
+          const parsed = JSON.parse(content);
+          
+          // Handle both array and object formats
+          parsedQuestions = Array.isArray(parsed) ? parsed : [parsed];
           
           // Validate the structure of the imported questions
-          const isValid = Array.isArray(parsedQuestions) && 
-            parsedQuestions.every(q => 
-              q.id && 
-              q.question && 
-              Array.isArray(q.answers) && 
-              q.answers.every(a => 'text' in a && 'isCorrect' in a)
-            );
+          const isValid = parsedQuestions.every(q => 
+            q.question && 
+            Array.isArray(q.answers) && 
+            q.answers.length > 0 &&
+            q.answers.every(a => 'text' in a && 'isCorrect' in a)
+          );
           
           if (!isValid) {
-            toast.error('The JSON file has an invalid format.');
+            toast.error('The JSON file has an invalid format. Questions must have a question text and at least one answer with text and isCorrect properties.');
+            parsedQuestions = [];
             return;
           }
           
+          console.log("Valid questions parsed:", parsedQuestions.length);
+          console.log("Sample question:", parsedQuestions);
           // Show the import dialog for confirmation
           showImportDialog = true;
           
         } catch (error) {
           toast.error('Error parsing JSON file.');
           console.error('Import error:', error);
+          parsedQuestions = [];
         }
       };
       
@@ -122,10 +128,31 @@
       input.value = '';
     }
   }
-  
-  function importQuestionsWithMode(mode: 'replace' | 'add') {
-    try {
-      importQuestions(parsedQuestions, mode);
+    function importQuestionsWithMode(mode: 'replace' | 'add') {
+    try {   
+      // Process questions to ensure they have all required fields
+      const processedQuestions = parsedQuestions.map((q, index) => {
+        // If question already has an ID, keep it (for 'add' mode) unless we're replacing
+        const questionId = mode === 'replace' || !q.id ? `q${index}` : q.id;
+        
+        return {
+          id: questionId,
+          question: q.question,
+          answers: q.answers,
+          createdAt: q.createdAt || Date.now(),
+          updatedAt: q.updatedAt || Date.now(),
+          stats: q.stats || {
+            accuracy: 0,
+            attempts: 0,
+            correctCount: 0,
+            incorrectCount: 0,
+            lastUsed: 0
+          }
+        };
+      });
+
+      
+      importQuestions(processedQuestions, mode);
       
       // Update UI
       loadQuestions();
@@ -133,12 +160,15 @@
       
       // Show success message
       if (mode === 'replace') {
-        toast.success(`Replaced all questions with ${parsedQuestions.length} imported questions.`);
+        toast.success(`Replaced all questions with ${processedQuestions.length} imported questions.`);
       } else {
-        toast.success(`Added ${parsedQuestions.length} questions to your collection.`);
+        toast.success(`Added ${processedQuestions.length} questions to your collection.`);
       }
+      
+      // Reset parsedQuestions after successful import
+      parsedQuestions = [];
     } catch (error) {
-      toast.error('Error importing questions.');
+      toast.error('Error importing questions: ' + (error instanceof Error ? error.message : 'Unknown error'));
       console.error('Import error:', error);
     }
   }
@@ -284,50 +314,13 @@
     questionsPerPage = parseInt(target.value, 10);
     currentPage = 1;
   }
-
+  // We're now using importQuestionsWithMode instead of this function
+  // This function is kept for reference but is no longer used
+  /*
   function handleImportQuestions() {
-    // Validate JSON structure
-    try {
-      parsedQuestions.forEach(q => {
-        if (!q.question || !Array.isArray(q.answers)) {
-          throw new Error('Invalid question format');
-        }
-      });
-
-      const currentLength = questions.length;
-      
-      // Import each question
-      parsedQuestions.forEach(q => {
-        // Generate a unique ID and timestamps
-        const newQuestion: QuizQuestion = {
-          id: `q${currentLength}`,
-          question: q.question,
-          answers: q.answers,
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-          stats: {
-            accuracy: 0,
-            attempts: 0,
-            correctCount: 0,
-            incorrectCount: 0,
-            lastUsed: 0
-          }
-        };
-        
-        // Save the question
-        saveQuestion(newQuestion);
-      });
-      
-      toast.success('Questions imported successfully!');
-      loadQuestions();
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      toast.error(`Import failed: ${errorMessage}`);
-    } finally {
-      showImportDialog = false;
-      parsedQuestions = [];
-    }
+    // Functionality moved to importQuestionsWithMode
   }
+  */
 
   function handleFileUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
@@ -441,10 +434,10 @@
 
       <AlertDialog.Footer>
         <AlertDialog.Cancel onclick={closeImportDialog}>Cancel</AlertDialog.Cancel>
-        <AlertDialog.Action class="bg-amber-600 hover:bg-amber-700" onclick={() => importQuestionsWithMode('add')}>
+        <AlertDialog.Action class="bg-amber-600 hover:bg-amber-700" onclick={importQuestionsWithMode('add')}>
           Add to Existing
         </AlertDialog.Action>
-        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" onclick={() => importQuestionsWithMode('replace')}>
+        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" onclick={importQuestionsWithMode('replace')}>
           Replace All
         </AlertDialog.Action>
       </AlertDialog.Footer>
@@ -571,10 +564,10 @@
           onchange={handleChangePerPage}
           value={questionsPerPage}
         >
-          <option value="10">10</option>
-          <option value="20">20</option>
-          <option value="50">50</option>
-          <option value="100">100</option>
+          <option value={10}>10</option>
+          <option value={20}>20</option>
+          <option value={50}>50</option>
+          <option value={100}>100</option>
         </select>
         per page
       </label>
@@ -582,7 +575,7 @@
   </div>
 
   <div class="rounded-lg border border-border">
-    <div class="overflow-x-auto">
+    <div class="overflow-auto">
       <table class="w-full">        
        <thead>
   <tr class="border-b border-border bg-muted/50">

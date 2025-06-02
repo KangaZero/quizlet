@@ -66,11 +66,11 @@
 		</div>
 	</header>
 	
-	<main class="container mx-auto p-4">
+	<main class="container mx-auto p-4 flex-grow overflow-y-auto">
 		{@render children()}
 	</main>
 	
-	<footer class="border-t border-border mt-8 py-6">
+	<footer class="border-t mt-8 py-6">
 		<div class="container mx-auto px-4 text-center text-sm text-muted-foreground">
 			<p>Quiz Application &copy; {new Date().getFullYear()}</p>
 		</div>

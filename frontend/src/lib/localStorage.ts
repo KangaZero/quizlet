@@ -32,8 +32,13 @@ export function saveQuestion(question: QuizQuestion): void {
 export function importQuestions(questions: QuizQuestion[], mode: 'replace' | 'add'): void {
 	if (typeof localStorage === 'undefined') return;
 
-	// Ensure all imported questions have stats
+	// Ensure all imported questions have stats and required fields
 	const processedQuestions = questions.map((question) => {
+		// Ensure the question has all required fields
+		if (!question.id) {
+			question.id = `q${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+		}
+
 		// If the question doesn't have stats, initialize them
 		if (!question.stats) {
 			question.stats = {
@@ -44,6 +49,15 @@ export function importQuestions(questions: QuizQuestion[], mode: 'replace' | 'ad
 				lastUsed: 0
 			};
 		}
+
+		// Ensure timestamps exist
+		if (!question.createdAt) {
+			question.createdAt = Date.now();
+		}
+		if (!question.updatedAt) {
+			question.updatedAt = Date.now();
+		}
+
 		return question;
 	});
 
