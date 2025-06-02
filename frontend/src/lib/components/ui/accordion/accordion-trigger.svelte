@@ -18,7 +18,7 @@
 			className
 		)}
 		{...$$restProps}
-		on:click
+		onclick
 	>
 		<slot />
 		<ChevronDown

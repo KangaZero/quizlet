@@ -25,7 +25,7 @@
 		className
 	)}
 	{...$$restProps}
-	on:click={onClick}
+	onclick={onClick}
 	on:keydown={onKeydown}
 	{disabled}
 >

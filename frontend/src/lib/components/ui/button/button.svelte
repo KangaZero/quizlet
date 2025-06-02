@@ -18,7 +18,7 @@
 	class={cn(buttonVariants({ variant, size, className }))}
 	type="button"
 	{...$$restProps}
-	on:click
+	onclick
 	on:keydown
 >
 	<slot />

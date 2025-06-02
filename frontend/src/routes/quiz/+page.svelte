@@ -598,7 +598,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 
 
 		<button
-			on:click={startQuiz}
+			onclick={startQuiz}
 			class="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
 		>
 			Start Custom Quiz
@@ -664,7 +664,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 									? 'border-green-500 bg-green-100 dark:border-green-600 dark:bg-green-900'
 									: 'border-red-500 bg-red-100 dark:border-red-600 dark:bg-red-900'
 								: 'border-border hover:bg-muted'}"
-						on:click={() => selectAnswer(i)}
+						onclick={() => selectAnswer(i)}
 						disabled={getCurrentQuestion().answers.filter((a) => a.isCorrect).length === 1 &&
 							selectedAnswerIndex !== null}
 					>
@@ -680,7 +680,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 				<div class="mt-4 text-center">
 					<button
 						class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
-						on:click={submitMultipleAnswers}
+						onclick={submitMultipleAnswers}
 					>
 						Submit Answers
 					</button>
@@ -708,7 +708,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 						lastAnswerCorrect === null
 							? 'hover:scale-105 active:scale-95'
 							: ''}"
-						on:click={moveToPreviousQuestion}
+						onclick={moveToPreviousQuestion}
 						disabled={currentQuestionIndex === 0 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
@@ -726,7 +726,7 @@ import * as Accordion from "$lib/components/ui/accordion";
                     {currentQuestionIndex === i
 										? 'bg-primary text-primary-foreground'
 										: 'bg-muted hover:bg-muted/80'}"
-									on:click={() => moveToQuestion(i)}
+									onclick={() => moveToQuestion(i)}
 									disabled={selectedAnswerIndex !== null ||
 										selectedAnswers.length > 0 ||
 										lastAnswerCorrect !== null}
@@ -742,7 +742,7 @@ import * as Accordion from "$lib/components/ui/accordion";
                   {currentQuestionIndex === 0
 									? 'bg-primary text-primary-foreground'
 									: 'bg-muted hover:bg-muted/80'}"
-								on:click={() => moveToQuestion(0)}
+								onclick={() => moveToQuestion(0)}
 								disabled={selectedAnswerIndex !== null ||
 									selectedAnswers.length > 0 ||
 									lastAnswerCorrect !== null}
@@ -763,7 +763,7 @@ import * as Accordion from "$lib/components/ui/accordion";
                       {currentQuestionIndex === i
 											? 'font-bold text-green-400 dark:text-green-600 underline'
 											: 'bg-muted hover:bg-muted/80'}"
-										on:click={() => moveToQuestion(i)}
+										onclick={() => moveToQuestion(i)}
 										disabled={selectedAnswerIndex !== null ||
 											selectedAnswers.length > 0 ||
 											lastAnswerCorrect !== null}
@@ -784,7 +784,7 @@ import * as Accordion from "$lib/components/ui/accordion";
                   {currentQuestionIndex === questions.length - 1
 									? 'bg-primary text-primary-foreground'
 									: 'bg-muted hover:bg-muted/80'}"
-								on:click={() => moveToQuestion(questions.length - 1)}
+								onclick={() => moveToQuestion(questions.length - 1)}
 								disabled={selectedAnswerIndex !== null ||
 									selectedAnswers.length > 0 ||
 									lastAnswerCorrect !== null}
@@ -803,7 +803,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 						)
 							? 'hover:scale-105 active:scale-95'
 							: ''}"
-						on:click={moveToNextQuestion}
+						onclick={moveToNextQuestion}
 						disabled={currentQuestionIndex === questions.length - 1 ||
 							selectedAnswerIndex !== null ||
 							selectedAnswers.length > 0 ||
@@ -861,11 +861,11 @@ import * as Accordion from "$lib/components/ui/accordion";
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel on:click={handleCancelQuiz} class="hover:scale-105 active:scale-95"
+			<AlertDialog.Cancel onclick={handleCancelQuiz} class="hover:scale-105 active:scale-95"
 				>Cancel</AlertDialog.Cancel
 			>
 			<AlertDialog.Action
-				on:click={handleContinueWithFewerQuestions}
+				onclick={handleContinueWithFewerQuestions}
 				class="text-sm text-red-600 hover:underline dark:text-red-400">Continue</AlertDialog.Action
 			>
 		</AlertDialog.Footer>
@@ -882,8 +882,8 @@ import * as Accordion from "$lib/components/ui/accordion";
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel on:click={handleCancelNoQuestions} class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action on:click={handleGoToEdit} class="text-sm text-green-400 hover:underline dark:text-green-600">Add Questions</AlertDialog.Action>
+			<AlertDialog.Cancel onclick={handleCancelNoQuestions} class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action onclick={handleGoToEdit} class="text-sm text-green-400 hover:underline dark:text-green-600">Add Questions</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>
@@ -897,7 +897,7 @@ import * as Accordion from "$lib/components/ui/accordion";
 			</AlertDialog.Description>
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
-			<AlertDialog.Action on:click={handleCancelNoMatchingQuestions} class="hover:scale-105 active:scale-95">OK</AlertDialog.Action>
+			<AlertDialog.Action onclick={handleCancelNoMatchingQuestions} class="hover:scale-105 active:scale-95">OK</AlertDialog.Action>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

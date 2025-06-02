@@ -5,7 +5,7 @@
 	import { initSampleQuestions} from '$lib/sampleData';
 	import Toaster from '$lib/components/ui/toast/toaster.svelte';
 	import { getUserSettings, getQuestions } from '$lib/localStorage';
-
+	export const prerender = true;
 	let { children } = $props();
    const existingQuestions = getQuestions();
 	
@@ -52,7 +52,7 @@
       href="/quiz" 
       class="opacity-50 pointer-events-none cursor-not-allowed text-muted-foreground" 
       aria-disabled="true"
-      on:click|preventDefault={handleQuizClick}
+      onclick|preventDefault={handleQuizClick}
       title="Please set your username in Settings first"
     >
       Quiz

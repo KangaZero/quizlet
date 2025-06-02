@@ -402,7 +402,7 @@
 <div>
   <button
       class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95 mr-2"
-      on:click={exportQuestionsAsJson}
+      onclick={exportQuestionsAsJson}
       disabled={questions.length === 0}
       title={questions.length === 0 ? 'No questions to export' : 'Export all questions as JSON'}
     >
@@ -412,7 +412,7 @@
     <!-- Import button that triggers file input click -->
     <button
       class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
-      on:click={() => document.getElementById('fileInput')?.click()}
+      onclick={() => document.getElementById('fileInput')?.click()}
       title="Import questions from a JSON file"
     >
       Import JSON
@@ -439,11 +439,11 @@
       </AlertDialog.Header>
 
       <AlertDialog.Footer>
-        <AlertDialog.Cancel on:click={closeImportDialog}>Cancel</AlertDialog.Cancel>
-        <AlertDialog.Action class="bg-amber-600 hover:bg-amber-700" on:click={() => importQuestionsWithMode('add')}>
+        <AlertDialog.Cancel onclick={closeImportDialog}>Cancel</AlertDialog.Cancel>
+        <AlertDialog.Action class="bg-amber-600 hover:bg-amber-700" onclick={() => importQuestionsWithMode('add')}>
           Add to Existing
         </AlertDialog.Action>
-        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" on:click={() => importQuestionsWithMode('replace')}>
+        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" onclick={() => importQuestionsWithMode('replace')}>
           Replace All
         </AlertDialog.Action>
       </AlertDialog.Footer>
@@ -465,7 +465,7 @@
   {#if !isAdding}
   <button
     class="cursor-pointer rounded-md bg-primary border px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
-    on:click={startAdd}
+    onclick={startAdd}
   >
     Add Question
   </button>
@@ -507,7 +507,7 @@
           />
           <button
             class="cursor-pointer rounded-md border border-border p-2 text-muted-foreground hover:bg-muted hover:scale-105 active:scale-95"
-            on:click={() => removeAnswerOption(i)}
+            onclick={() => removeAnswerOption(i)}
             disabled={answers.length <= 2}
             title="Remove answer option"
           >
@@ -519,7 +519,7 @@
       {#if answers.length < 6}
         <button
           class="cursor-pointer hover:scale-105 active:scale-95 mt-2 inline-flex items-center text-sm text-primary hover:underline"
-          on:click={addAnswerOption}
+          onclick={addAnswerOption}
         >
           + Add answer option
         </button>
@@ -529,13 +529,13 @@
     <div class="flex justify-end gap-2">
       <button
         class="cursor-pointer rounded-md border border-border px-4 py-2 hover:bg-muted hover:scale-105 active:scale-95"
-        on:click={cancelAdd}
+        onclick={cancelAdd}
       >
         Cancel
       </button>
       <button
         class="cursor-pointer rounded-md bg-primary px-4 py-2 border bg-green-200 text-green-400 dark:text-green-600 text-primary-foreground transition-colors hover:bg-primary/90 hover:scale-105 active:scale-95"
-        on:click={handleSaveQuestion}
+        onclick={handleSaveQuestion}
       >
         {editingQuestion ? 'Update' : 'Save'} Question
       </button>
@@ -587,31 +587,31 @@
   <tr class="border-b border-border bg-muted/50">
     <th 
       class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
-      on:click={() => handleSort('id')}
+      onclick={() => handleSort('id')}
     >
       ID {sortBy === 'id' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
     </th>
     <th 
       class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
-      on:click={() => handleSort('accuracy')}
+      onclick={() => handleSort('accuracy')}
     >
       Accuracy {sortBy === 'accuracy' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
     </th>
     <th 
       class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
-      on:click={() => handleSort('attempts')}
+      onclick={() => handleSort('attempts')}
     >
       Attempts {sortBy === 'attempts' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
     </th>
     <th 
       class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
-      on:click={() => handleSort('lastUsed')}
+      onclick={() => handleSort('lastUsed')}
     >
       Last Used {sortBy === 'lastUsed' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
     </th>
     <th 
       class="px-4 py-3 text-left text-sm font-medium cursor-pointer select-none" 
-      on:click={() => handleSort('question')}
+      onclick={() => handleSort('question')}
     >
       Question {sortBy === 'question' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
     </th>
@@ -650,13 +650,13 @@
               <td class="px-4 py-4 text-right">
                 <button
                   class="cursor-pointer hover:scale-95 active:scale-105 rounded-md min-w-[70px] border px-3 py-1 text-sm hover:bg-muted"
-                  on:click={() => startEdit(question)}
+                  onclick={() => startEdit(question)}
                 >
                   Edit
                 </button>
                 <button
                   class="cursor-pointer hover:scale-95 active:scale-105 rounded-md min-w-[70px] border bg-red-50 px-3 py-1 mt-2 text-sm text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50"
-                  on:click={() => showDeleteDialog = true}
+                  onclick={() => showDeleteDialog = true}
                 >
                   Delete
                 </button>
@@ -674,7 +674,7 @@
         <button
           class="cursor-pointer rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === 1}
-          on:click={() => changePage(currentPage - 1)}
+          onclick={() => changePage(currentPage - 1)}
         >
           Previous
         </button>
@@ -683,7 +683,7 @@
           {#if i + 1 === currentPage || i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
             <button
               class="cursor-pointer rounded-md border px-3 py-1 text-sm {currentPage === i + 1 ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'}"
-              on:click={() => changePage(i + 1)}
+              onclick={() => changePage(i + 1)}
             >
               {i + 1}
             </button>
@@ -696,7 +696,7 @@
           class="cursor-pointer 
           rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === totalPages}
-          on:click={() => changePage(currentPage + 1)}
+          onclick={() => changePage(currentPage + 1)}
         >
           Next
         </button>
@@ -716,8 +716,8 @@
       </AlertDialog.Header>
 
       <AlertDialog.Footer>
-        <AlertDialog.Cancel on:click={() => showDeleteDialog = false}>Cancel</AlertDialog.Cancel>
-        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" on:click={() => handleDelete(editingQuestion?.id || '')}>
+        <AlertDialog.Cancel onclick={() => showDeleteDialog = false}>Cancel</AlertDialog.Cancel>
+        <AlertDialog.Action class="bg-red-600 hover:bg-red-700" onclick={() => handleDelete(editingQuestion?.id || '')}>
           Delete
         </AlertDialog.Action>
       </AlertDialog.Footer>

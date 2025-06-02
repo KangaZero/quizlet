@@ -99,7 +99,7 @@
 
 <div class="mb-3 flex flex-wrap items-center justify-between gap-4">
   <div>
-    <label class="mr-2 text-sm font-medium">Filter by Mode:</label>
+    <label for="filter" class="mr-2 text-sm font-medium">Filter by Mode:</label>
     <select
       class="rounded-md border border-input bg-background px-3 py-1 dark:bg-slate-600"
       bind:value={filterMode}
@@ -132,7 +132,7 @@
     
     <button
       class="ml-2 rounded-md border border-border p-2 hover:bg-muted hover:scale-105 active:scale-95 transition-transform"
-      on:click={() => sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'}
+      onclick={() => sortDirection = sortDirection === 'asc' ? 'desc' : 'asc'}
       title={`Currently sorting ${sortDirection === 'asc' ? 'ascending' : 'descending'}`}
     >
       {sortDirection === 'asc' ? '↑' : '↓'}
@@ -155,7 +155,7 @@
           <tr class="border-b border-border bg-muted/50">
             <th class="px-4 py-3 text-left text-sm font-medium">Player</th>
             <th class="px-4 py-3 text-left text-sm font-medium">
-              <button class="inline-flex items-center font-medium" on:click={() => handleSort('date')}>
+              <button class="inline-flex items-center font-medium" onclick={() => handleSort('date')}>
                 Date
                 {#if sortBy === 'date'}
                   <span class="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -164,7 +164,7 @@
             </th>
             <th class="px-4 py-3 text-left text-sm font-medium">Mode</th>
             <th class="px-4 py-3 text-right text-sm font-medium">
-              <button class="inline-flex items-center font-medium" on:click={() => handleSort('score')}>
+              <button class="inline-flex items-center font-medium" onclick={() => handleSort('score')}>
                 Score
                 {#if sortBy === 'score'}
                   <span class="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -172,7 +172,7 @@
               </button>
             </th>
             <th class="px-4 py-3 text-right text-sm font-medium">
-              <button class="inline-flex items-center font-medium" on:click={() => handleSort('accuracy')}>
+              <button class="inline-flex items-center font-medium" onclick={() => handleSort('accuracy')}>
                 Accuracy
                 {#if sortBy === 'accuracy'}
                   <span class="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -180,7 +180,7 @@
               </button>
             </th>
             <th class="px-4 py-3 text-right text-sm font-medium">
-              <button class="inline-flex items-center font-medium" on:click={() => handleSort('time')}>
+              <button class="inline-flex items-center font-medium" onclick={() => handleSort('time')}>
                 Time
                 {#if sortBy === 'time'}
                   <span class="ml-1">{sortDirection === 'asc' ? '↑' : '↓'}</span>
@@ -227,7 +227,7 @@
         <button
           class="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === 1}
-          on:click={() => changePage(currentPage - 1)}
+          onclick={() => changePage(currentPage - 1)}
         >
           Previous
         </button>
@@ -236,7 +236,7 @@
           {#if i + 1 === currentPage || i + 1 === 1 || i + 1 === totalPages || (i + 1 >= currentPage - 1 && i + 1 <= currentPage + 1)}
             <button
               class="rounded-md border px-3 py-1 text-sm {currentPage === i + 1 ? 'border-primary bg-primary/10' : 'border-border hover:bg-muted'}"
-              on:click={() => changePage(i + 1)}
+              onclick={() => changePage(i + 1)}
             >
               {i + 1}
             </button>
@@ -248,7 +248,7 @@
         <button
           class="rounded-md border border-border px-3 py-1 text-sm disabled:opacity-50"
           disabled={currentPage === totalPages}
-          on:click={() => changePage(currentPage + 1)}
+          onclick={() => changePage(currentPage + 1)}
         >
           Next
         </button>

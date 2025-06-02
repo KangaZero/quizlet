@@ -57,7 +57,7 @@
 
 			<button
 				class="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
-				on:click={handleSaveSettings}
+				onclick={handleSaveSettings}
 			>
 				Save Settings
 			</button>
@@ -74,7 +74,7 @@
 						'dark'
 							? 'bg-primary'
 							: ''}"
-						on:click={toggleTheme}
+						onclick={toggleTheme}
 					>
 						<span class="sr-only">Toggle Dark Mode</span>
 						<span
@@ -125,7 +125,7 @@
 			<AlertDialog.Footer>
 				<AlertDialog.Cancel class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
 				<AlertDialog.Action
-					on:click={resetQuizData}
+					onclick={resetQuizData}
 					class="text-sm text-red-600 hover:underline dark:text-red-400"
 					>Continue</AlertDialog.Action
 				>
