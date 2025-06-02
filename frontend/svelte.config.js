@@ -5,10 +5,14 @@ const config = {
 	kit: {
 		appDir: 'app',
 		adapter: adapter({
-			fallback: '404.html'
+			pages: 'build',
+			assets: 'build',
+			fallback: '404.html',
+			precompress: false,
+			strict: true
 		}),
 		paths: {
-			base: process.argv.includes('dev') ? '' : '/quizlet.io'
+			base: process.argv.includes('dev') ? '' : '/quizlet'
 		}
 	}
 };
