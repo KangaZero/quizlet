@@ -1,19 +1,19 @@
-import adapter from '@sveltejs/adapter-static';
+import adapter from '@sveltejs/adapter-vercel';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
 		appDir: 'app',
 		adapter: adapter({
-			pages: 'build',
-			assets: 'build',
+			// pages: 'build',
+			// assets: 'build',
 			fallback: '404.html',
-			precompress: false,
+			// precompress: false,
 			strict: true
 		}),
-		paths: {
-			base: process.argv.includes('dev') ? '' : '/quizlet'
-		}
+		// paths: {
+		// 	base: process.argv.includes('dev') ? '' : '/quizlet'
+		// }
 	}
 };
 

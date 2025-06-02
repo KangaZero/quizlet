@@ -17,7 +17,7 @@
 		"test": "npm run test:unit -- --run",
 		"storybook": "storybook dev -p 6006",
 		"build-storybook": "storybook build",
-		"deploy": "npm run build && touch build/.nojekyll && npx gh-pages -d build -t true"
+		"deploy": "set NODE_TLS_REJECT_UNAUTHORIZED=0 && npx gh-pages -d build"
 	},
 	"devDependencies": {
 		"@chromatic-com/storybook": "^4.0.0-0",
@@ -30,6 +30,7 @@
 		"@storybook/sveltekit": "^9.0.0",
 		"@sveltejs/adapter-auto": "^6.0.0",
 		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/adapter-vercel": "^5.7.2",
 		"@sveltejs/kit": "^2.16.0",
 		"@sveltejs/vite-plugin-svelte": "^5.0.0",
 		"@tailwindcss/forms": "^0.5.9",
