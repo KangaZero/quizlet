@@ -320,8 +320,9 @@
       
       toast.success('Questions imported successfully!');
       loadQuestions();
-    } catch (error) {
-      toast.error(`Import failed: ${error.message}`);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Import failed: ${errorMessage}`);
     } finally {
       showImportDialog = false;
       parsedQuestions = [];
@@ -385,11 +386,11 @@
     
     // Sort in the correct direction
     if (sortDirection === 'asc') {
-      if (typeof valueA === 'string') return valueA.localeCompare(valueB);
-      return valueA - valueB;
+      if (typeof valueA === 'string') return valueA.localeCompare(String(valueB));
+      return Number(valueA) - Number(valueB);
     } else {
-      if (typeof valueA === 'string') return valueB.localeCompare(valueA);
-      return valueB - valueA;
+      if (typeof valueA === 'string') return String(valueB).localeCompare(String(valueA));
+      return Number(valueB) - Number(valueA);
     }
   });
   $: paginatedQuestions = sortedQuestions.slice(
@@ -423,7 +424,7 @@
       type="file" 
       id="fileInput" 
       accept=".json,application/json" 
-      on:change={importQuestionsFromJson} 
+      onchange={importQuestionsFromJson} 
       class="hidden" 
     />
   </div>
@@ -458,7 +459,7 @@
         placeholder="Search questions..."
         class="w-full rounded-md border border-input bg-background px-3 py-2 pr-10"
         bind:value={searchTerm}
-        on:input={handleSearch}
+        oninput={handleSearch}
       />
     </div>
   </div>
@@ -497,7 +498,7 @@
             type="checkbox"
             name="correctAnswer"
             checked={answer.isCorrect}
-            on:change={() => toggleCorrectAnswer(i)}
+            onchange={() => toggleCorrectAnswer(i)}
           />
           <input
             type="text"
@@ -567,7 +568,7 @@
         Show 
         <select
           class="rounded-md border border-input dark:bg-slate-600 px-2 py-1"
-          on:change={handleChangePerPage}
+          onchange={handleChangePerPage}
           value={questionsPerPage}
         >
           <option value="10">10</option>
