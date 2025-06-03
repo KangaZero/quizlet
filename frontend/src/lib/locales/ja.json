@@ -17,7 +17,12 @@
 		"correct": "正解！",
 		"incorrect": "不正解！",
 		"partial": "部分的に正解！",
-		"time": "時間: {minutes}:{seconds}"
+		"time": "時間: {minutes}:{seconds}",
+		"questionCount": "{count, plural, other {# 問}}",
+		"correctCount": "{count, plural, other {# 正解}}",
+		"incorrectCount": "{count, plural, other {# 不正解}}",
+		"missedCount": "{count, plural, other {# 個の正解を見逃しました。}}",
+		"selectedCount": "{count, plural, other {# 個の不正解を選択しました。}}"
 	},
 	"edit": {
 		"title": "質問管理",
@@ -26,18 +31,49 @@
 		"export": "JSONをエクスポート",
 		"delete": "削除",
 		"save": "質問を保存",
-		"cancel": "キャンセル"
+		"cancel": "キャンセル",
+		"answerOptions": "回答オプション",
+		"addAnswerOption": "回答オプションを追加",
+		"removeAnswerOption": "回答オプションを削除",
+		"answerOptionPlaceholder": "回答オプション {number}",
+		"answerCount": "{count, plural, other {# 回答}}",
+		"atLeastTwoAnswers": "少なくとも2つの回答オプションが必要です"
 	},
 	"settings": {
 		"title": "設定",
 		"userSettings": "ユーザー設定",
 		"username": "ユーザー名",
-		"save": "設定を保存",
+		"usernameDescription": "スコアセクションに表示されるユーザー名です。",
+		"saveButton": "設定を保存",
 		"usernamePlaceholder": "ユーザー名を入力",
 		"saveSuccess": "設定が保存されました",
+		"themeSuccess": "テーマが変更されました: {theme}",
+		"fontSuccess": "フォントが{font}に変更されました！",
+		"appearance": "外観",
 		"darkMode": "ダークモード",
+		"lightMode": "ライトモード",
+		"toggleDarkMode": "ダークモードを切り替え",
 		"fontStyle": "フォントを変更",
+		"toggleFontStyle": "フォントスタイルを切り替え",
 		"language": "言語",
-		"resetAllTitle": "すべてのクイズデータをリセット"
+		"quizData": "クイズデータ",
+		"resetAllTitle": "すべてのクイズデータをリセット",
+		"questionCountSaved": "{count, plural, =0 {保存された質問はありません} other {# 問が保存されています}}",
+		"scoreCountSaved": "{count, plural, =0 {保存されたスコア記録はありません} other {# 件のスコア記録が保存されています}}",
+		"dataResetSuccess": "すべてのクイズデータがリセットされました！"
+	},
+	"alertDialog": {
+		"title": "本当に続行しますか？",
+		"message": "この操作は元に戻せません。すべての質問とスコアが永久に削除されます。",
+		"confirm": "確認",
+		"cancel": "キャンセル",
+		"reset": "リセット"
+	},
+	"common": {
+		"count": "{count, plural, =0 {アイテムなし} other {# アイテム}}",
+		"option": "{count, plural, other {# オプション}}",
+		"point": "{count, plural, other {# ポイント}}",
+		"question": "{count, plural, other {問}}",
+		"score": "{count, plural, other {スコア}}"
 	}
 }

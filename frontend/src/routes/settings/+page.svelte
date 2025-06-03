@@ -32,7 +32,7 @@
 			const newTheme = currentTheme === 'light' ? 'dark' : 'light';
 			saveUserSettings({ userName: $userName, theme: newTheme });
 			if (browser) {
-				toast.success(`Theme changed to ${newTheme}!`);
+				toast.success($_('settings.themeSuccess', { values: { theme: newTheme } }));
 			}
 			return newTheme;
 		});
@@ -59,7 +59,11 @@
 			}
 
 			if (browser) {
-				toast.success(`Font changed to ${newFont === 'comic' ? 'Comic Sans' : 'Normal'}!`);
+				toast.success(
+					$_('settings.fontSuccess', {
+						values: { font: newFont === 'comic' ? 'Comic Sans' : 'Normal' }
+					})
+				);
 			}
 
 			return newFont;
@@ -70,7 +74,7 @@
 		localStorage.removeItem('quizQuestions');
 		localStorage.removeItem('quizScores');
 		if (browser) {
-			toast.success('All quiz data has been reset!');
+			toast.success($_('settings.dataResetSuccess'));
 		}
 	}
 
@@ -85,7 +89,9 @@
 			<h2 class="mb-4 text-xl font-semibold">{$_('settings.userSettings')}</h2>
 
 			<div class="mb-4">
-				<label class="mb-2 block text-sm font-medium" for="userName">Your Name</label>
+				<label class="mb-2 block text-sm font-medium" for="userName"
+					>{$_('settings.username')}</label
+				>
 				<input
 					type="text"
 					id="userName"
@@ -93,7 +99,7 @@
 					placeholder={$_('settings.usernamePlaceholder')}
 					bind:value={nameInput}
 				/>
-				<p class="text-muted-foreground mt-1 text-sm">This will appear on your quiz scores</p>
+				<p class="text-muted-foreground mt-1 text-sm">{$_('settings.usernameDescription')}</p>
 			</div>
 			<label class="my-4 flex flex-col">
 				<span>{$_('settings.language')}</span>
@@ -111,16 +117,16 @@
 				class="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
 				onclick={handleSaveSettings}
 			>
-				Save Settings
+				{$_('settings.saveButton')}
 			</button>
 		</div>
 
 		<div class="border-border bg-card rounded-lg border p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold">Appearance</h2>
+			<h2 class="mb-4 text-xl font-semibold">{$_('settings.appearance')}</h2>
 
 			<div class="mb-4">
 				<label class="flex items-center justify-between">
-					<span>Dark Mode</span>
+					<span>{$_('settings.darkMode')}</span>
 					<button
 						class="relative inline-flex h-6 w-11 items-center rounded-full border bg-slate-400 transition-colors dark:bg-slate-800 {$theme ===
 						'dark'
@@ -128,7 +134,7 @@
 							: ''}"
 						onclick={toggleTheme}
 					>
-						<span class="sr-only">Toggle Dark Mode</span>
+						<span class="sr-only">{$_('settings.toggleDarkMode')}</span>
 						<span
 							class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {$theme ===
 							'dark'
@@ -138,7 +144,7 @@
 					</button>
 				</label>
 				<label class="mt-6 flex items-center justify-between">
-					<span>Spice it up</span>
+					<span>{$_('settings.fontStyle')}</span>
 					<button
 						class="relative inline-flex h-6 w-11 items-center rounded-full border bg-slate-400 transition-colors dark:bg-slate-800 {$fontStyle ===
 						'comic'
@@ -146,7 +152,7 @@
 							: ''}"
 						onclick={toggleFont}
 					>
-						<span class="sr-only">Toggle Font Style</span>
+						<span class="sr-only">{$_('settings.toggleFontStyle')}</span>
 						<span
 							class="inline-block h-5 w-5 transform rounded-full bg-white transition-transform {$fontStyle ===
 							'comic'
@@ -160,44 +166,46 @@
 	</div>
 
 	<div class="border-border bg-card mt-6 rounded-lg border p-6 shadow-sm">
-		<h2 class="mb-4 text-xl font-semibold">Quiz Data</h2>
+		<h2 class="mb-4 text-xl font-semibold">{$_('settings.quizData')}</h2>
 
 		<div class="grid gap-4 sm:grid-cols-2">
 			<div>
-				<h3 class="text-lg font-medium">Questions</h3>
+				<h3 class="text-lg font-medium">{$_('common.question', { values: { count: 2 } })}</h3>
 				<p class="text-muted-foreground">
-					You have {questionCount} question{questionCount === 1 ? '' : 's'} saved
+					{$_('settings.questionCountSaved', { values: { count: questionCount } })}
 				</p>
 			</div>
 
 			<div>
-				<h3 class="text-lg font-medium">Scores</h3>
+				<h3 class="text-lg font-medium">{$_('common.score', { values: { count: 2 } })}</h3>
 				<p class="text-muted-foreground">
-					You have {scoreCount} score record{scoreCount === 1 ? '' : 's'} saved
+					{$_('settings.scoreCountSaved', { values: { count: scoreCount } })}
 				</p>
 			</div>
 		</div>
 
 		<div class="border-border mt-6 border-t pt-4">
-			<AlertDialog.Trigger>Reset All Quiz Data</AlertDialog.Trigger>
+			<AlertDialog.Trigger>{$_('settings.resetAllTitle')}</AlertDialog.Trigger>
 		</div>
 
 		<AlertDialog.Trigger class="text-sm font-bold text-red-600 hover:underline dark:text-red-400"
-			>Reset</AlertDialog.Trigger
+			>{$_('alertDialog.reset')}</AlertDialog.Trigger
 		>
 		<AlertDialog.Content>
 			<AlertDialog.Header>
-				<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
+				<AlertDialog.Title>{$_('alertDialog.title')}</AlertDialog.Title>
 				<AlertDialog.Description>
-					This action cannot be undone. This will permanently delete all your questions and scores.
+					{$_('alertDialog.message')}
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 			<AlertDialog.Footer>
-				<AlertDialog.Cancel class="hover:scale-105 active:scale-95">Cancel</AlertDialog.Cancel>
+				<AlertDialog.Cancel class="hover:scale-105 active:scale-95"
+					>{$_('alertDialog.cancel')}</AlertDialog.Cancel
+				>
 				<AlertDialog.Action
 					onclick={resetQuizData}
 					class="text-sm text-red-600 hover:underline dark:text-red-400"
-					>Continue</AlertDialog.Action
+					>{$_('alertDialog.confirm')}</AlertDialog.Action
 				>
 			</AlertDialog.Footer>
 		</AlertDialog.Content>

@@ -17,7 +17,12 @@
 		"correct": "Correct!",
 		"incorrect": "Incorrect!",
 		"partial": "Partially Correct!",
-		"time": "Time: {minutes}:{seconds}"
+		"time": "Time: {minutes}:{seconds}",
+		"questionCount": "{count, plural, =1 {1 question} other {# questions}}",
+		"correctCount": "{count, plural, =1 {1 correct answer} other {# correct answers}}",
+		"incorrectCount": "{count, plural, =1 {1 incorrect option} other {# incorrect options}}",
+		"missedCount": "{count, plural, =1 {You missed 1 correct option.} other {You missed # correct options.}}",
+		"selectedCount": "{count, plural, =1 {You selected 1 incorrect option.} other {You selected # incorrect options.}}"
 	},
 	"edit": {
 		"title": "Quiz Question Manager",
@@ -26,19 +31,49 @@
 		"export": "Export JSON",
 		"delete": "Delete",
 		"save": "Save Question",
-		"cancel": "Cancel"
+		"cancel": "Cancel",
+		"answerOptions": "Answer Options",
+		"addAnswerOption": "Add answer option",
+		"removeAnswerOption": "Remove answer option",
+		"answerOptionPlaceholder": "Answer option {number}",
+		"answerCount": "{count, plural, =1 {1 answer} other {# answers}}",
+		"atLeastTwoAnswers": "At least two answer options are required"
 	},
 	"settings": {
 		"title": "Settings",
 		"userSettings": "User Settings",
 		"username": "Username",
-		"save": "Save Settings",
+		"usernameDescription": "This username will be displayed in the scores section.",
+		"saveButton": "Save Settings",
 		"usernamePlaceholder": "Enter your username",
 		"saveSuccess": "Settings saved successfully",
+		"themeSuccess": "Theme changed to: {theme}",
+		"fontSuccess": "Font changed to {font}!",
 		"appearance": "Appearance",
 		"darkMode": "Dark Mode",
+		"lightMode": "Light Mode",
+		"toggleDarkMode": "Toggle Dark Mode",
 		"fontStyle": "Spice it up",
+		"toggleFontStyle": "Toggle Font Style",
 		"language": "Language",
-		"resetAllTitle": "Reset All Quiz Data"
+		"quizData": "Quiz Data",
+		"resetAllTitle": "Reset All Quiz Data",
+		"questionCountSaved": "You have {count, plural, =0 {no questions} =1 {1 question} other {# questions}} saved",
+		"scoreCountSaved": "You have {count, plural, =0 {no score records} =1 {1 score record} other {# score records}} saved",
+		"dataResetSuccess": "All quiz data has been reset!"
+	},
+	"alertDialog": {
+		"title": "Are you sure?",
+		"message": "This action cannot be undone. This will permanently delete all your questions and scores.",
+		"confirm": "Confirm",
+		"cancel": "Cancel",
+		"reset": "Reset"
+	},
+	"common": {
+		"count": "{count, plural, =0 {no items} =1 {1 item} other {# items}}",
+		"option": "{count, plural, =1 {1 option} other {# options}}",
+		"point": "{count, plural, =1 {1 point} other {# points}}",
+		"question": "{count, plural, =1 {Question} other {Questions}}",
+		"score": "{count, plural, =1 {Score} other {Scores}}"
 	}
 }

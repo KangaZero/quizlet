@@ -12,6 +12,7 @@
 	import type { QuizQuestion } from '$lib/types';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import * as Accordion from '$lib/components/ui/accordion';
+	import { _ } from '$lib/i18n';
 
 	let showNoQuestionsDialog = false;
 	let showNotEnoughQuestionsDialog = false;
@@ -233,15 +234,16 @@
 		let feedback = '';
 
 		if (correctSelected > 0) {
-			feedback += `You got ${correctSelected} of ${correctAnswerIndices.length} correct. `;
+			feedback += $_('quiz.correctCount', { values: { count: correctSelected } }) + ' ';
+			feedback += $_('common.option', { values: { count: correctAnswerIndices.length } }) + '. ';
 		}
 
 		if (incorrectSelected > 0) {
-			feedback += `You selected ${incorrectSelected} incorrect option${incorrectSelected > 1 ? 's' : ''}. `;
+			feedback += $_('quiz.selectedCount', { values: { count: incorrectSelected } }) + ' ';
 		}
 
 		if (missedCorrect > 0) {
-			feedback += `You missed ${missedCorrect} correct option${missedCorrect > 1 ? 's' : ''}.`;
+			feedback += $_('quiz.missedCount', { values: { count: missedCorrect } });
 		}
 
 		return feedback;
@@ -934,9 +936,12 @@
 		<h2 class="mb-6 text-3xl font-bold">Quiz Finished!</h2>
 
 		<div class="mb-6 text-xl">
-			Your score: <span class="font-bold">{score}</span> / {mode === 'endless'
-				? currentQuestionIndex + 1
-				: questions.length}
+			{$_('quiz.score', {
+				values: {
+					score,
+					total: mode === 'endless' ? currentQuestionIndex + 1 : questions.length
+				}
+			})}
 		</div>
 
 		{#if mode === 'speedrun'}

@@ -12,6 +12,7 @@
 	import type { QuizQuestion } from '$lib/types';
 	import { toast } from '$lib/components/ui/toast';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
+	import { _ } from '$lib/i18n';
 
 	let questions: QuizQuestion[] = [];
 	let isLoading = false;
@@ -266,7 +267,7 @@
 
 		if (validAnswers.length < 2) {
 			if (browser) {
-				toast.error('At least two answer options are required');
+				toast.error($_('edit.atLeastTwoAnswers'));
 			}
 			return;
 		}
@@ -506,7 +507,7 @@
 		</div>
 
 		<div class="mb-4">
-			<label class="mb-1 block text-sm font-medium">Answer Options</label>
+			<label class="mb-1 block text-sm font-medium">{$_('edit.answerOptions')}</label>
 			<p class="text-muted-foreground mb-2 text-sm">
 				Select the radio button for the correct answer(s).
 			</p>
@@ -522,14 +523,14 @@
 					<input
 						type="text"
 						class="border-input bg-background flex-1 rounded-md border px-3 py-2"
-						placeholder={`Answer option ${i + 1}`}
+						placeholder={$_('edit.answerOptionPlaceholder', { values: { number: i + 1 } })}
 						bind:value={answer.text}
 					/>
 					<button
 						class="border-border text-muted-foreground hover:bg-muted cursor-pointer rounded-md border p-2 hover:scale-105 active:scale-95"
 						onclick={() => removeAnswerOption(i)}
 						disabled={answers.length <= 2}
-						title="Remove answer option"
+						title={$_('edit.removeAnswerOption')}
 					>
 						×
 					</button>
@@ -541,7 +542,7 @@
 					class="text-primary mt-2 inline-flex cursor-pointer items-center text-sm hover:scale-105 hover:underline active:scale-95"
 					onclick={addAnswerOption}
 				>
-					+ Add answer option
+					+ {$_('edit.addAnswerOption')}
 				</button>
 			{/if}
 		</div>
