@@ -1,0 +1,44 @@
+{
+	"app": {
+		"title": "Quizlet",
+		"nav": {
+			"home": "Home",
+			"quiz": "Quiz",
+			"edit": "Edit",
+			"scores": "Scores",
+			"settings": "Settings"
+		}
+	},
+	"quiz": {
+		"start": "Start Quiz",
+		"next": "Next Question",
+		"finish": "Finish Quiz",
+		"score": "Your score: {score} out of {total}",
+		"correct": "Correct!",
+		"incorrect": "Incorrect!",
+		"partial": "Partially Correct!",
+		"time": "Time: {minutes}:{seconds}"
+	},
+	"edit": {
+		"title": "Quiz Question Manager",
+		"add": "Add Question",
+		"import": "Import JSON",
+		"export": "Export JSON",
+		"delete": "Delete",
+		"save": "Save Question",
+		"cancel": "Cancel"
+	},
+	"settings": {
+		"title": "Settings",
+		"userSettings": "User Settings",
+		"username": "Username",
+		"save": "Save Settings",
+		"usernamePlaceholder": "Enter your username",
+		"saveSuccess": "Settings saved successfully",
+		"appearance": "Appearance",
+		"darkMode": "Dark Mode",
+		"fontStyle": "Spice it up",
+		"language": "Language",
+		"resetAllTitle": "Reset All Quiz Data"
+	}
+}

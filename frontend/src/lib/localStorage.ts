@@ -85,8 +85,6 @@ export function updateQuestion(question: QuizQuestion): void {
 }
 
 export function deleteQuestion(id: string): void {
-	if (typeof localStorage === 'undefined') return;
-
 	const questions = getQuestions();
 	const filteredQuestions = questions.filter((q) => q.id !== id);
 	localStorage.setItem(QUESTIONS_KEY, JSON.stringify(filteredQuestions));
@@ -162,10 +160,13 @@ export function getRandomQuestions(count: number, allowRepeats = false): QuizQue
 export const USER_SETTINGS = 'userSettings';
 
 export function getUserSettings(): UserSettings {
-	if (typeof localStorage === 'undefined') return { theme: 'light', userName: '' };
+	if (typeof localStorage === 'undefined')
+		return { theme: 'light', userName: 'Guest', fontStyle: 'normal', language: 'en' };
 
 	const settings = localStorage.getItem(USER_SETTINGS);
-	return settings ? JSON.parse(settings) : { theme: 'light', userName: '', fontStyle: 'normal' };
+	return settings
+		? JSON.parse(settings)
+		: { theme: 'light', userName: 'Guest', fontStyle: 'normal', language: 'en' };
 }
 
 export function saveUserSettings(settings: UserSettings): void {

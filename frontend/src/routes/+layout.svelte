@@ -1,23 +1,32 @@
 <script lang="ts">
 	import '../app.css';
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
-	import { theme, userName, fontStyle } from '$lib/stores';
+	import { theme, userName, fontStyle, language } from '$lib/stores';
 	import { initSampleQuestions } from '$lib/sampleData';
 	import Toaster from '$lib/components/ui/toast/toaster.svelte';
-
 	import { toast } from '$lib/components/ui/toast';
 	import { getUserSettings, getQuestions } from '$lib/localStorage';
-	export const prerender = true;
+	import { initI18n, locale, _ } from '$lib/i18n';
 	let { children } = $props();
 	const existingQuestions = getQuestions();
 
 	// Initialize theme from localStorage
 	onMount(() => {
-		const { theme: savedTheme, userName: savedName, fontStyle: savedFont } = getUserSettings();
+		// Initialize i18n
+		initI18n();
+
+		const {
+			theme: savedTheme,
+			userName: savedName,
+			fontStyle: savedFont,
+			language: savedLanguage
+		} = getUserSettings();
 		theme.set(savedTheme);
 		userName.set(savedName);
 		fontStyle.set(savedFont);
+		language.set(savedLanguage);
 		if (!savedFont) {
 			// Set default font style if not set
 			fontStyle.set('normal');
@@ -26,6 +35,16 @@
 			// Set default username if not set
 			userName.set('Guest');
 		}
+		if (!savedLanguage) {
+			// Set default language if not set
+			language.set('en');
+		}
+		// Update locale when language changes
+		language.subscribe((value) => {
+			if (browser) {
+				locale.set(value);
+			}
+		});
 		// Apply theme to document
 		document.documentElement.classList.toggle('dark', savedTheme === 'dark');
 		document.body.classList.toggle('comic-font', savedFont === 'comic');

@@ -34,4 +34,5 @@ export interface UserSettings {
 	theme: 'light' | 'dark';
 	userName: string;
 	fontStyle?: 'normal' | 'comic'; // Optional font style for gigachad mode
+	language: 'en' | 'ja';
 }

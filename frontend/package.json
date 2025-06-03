@@ -68,6 +68,7 @@
 		"vitest": "^3.0.0"
 	},
 	"dependencies": {
+		"svelte-i18n": "^4.0.1",
 		"svelte-radix": "^2.0.1"
 	}
 }

@@ -2,15 +2,28 @@
 	import { browser } from '$app/environment';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog';
 	import { toast } from '$lib/components/ui/toast';
-	import { theme, userName, fontStyle } from '$lib/stores';
+	import { theme, userName, fontStyle, language } from '$lib/stores';
 	import { getQuestions, getScores, saveUserSettings } from '$lib/localStorage';
+	import { _ } from '$lib/i18n';
 
 	let nameInput = $userName;
+	let selectedLanguage = $language;
+	const availableLanguages = [
+		{ value: 'en', label: 'English' },
+		{ value: 'ja', label: '日本語' }
+	];
+
 	function handleSaveSettings() {
 		userName.set(nameInput);
-		saveUserSettings({ userName: nameInput, theme: $theme });
+		language.set(selectedLanguage);
+		saveUserSettings({
+			userName: nameInput,
+			theme: $theme,
+			fontStyle: $fontStyle,
+			language: selectedLanguage
+		});
 		if (browser) {
-			toast.success('Settings saved successfully!');
+			toast.success($_('settings.saveSuccess'));
 		}
 	}
 
@@ -66,10 +79,10 @@
 </script>
 
 <AlertDialog.Root>
-	<h1 class="mb-6 text-2xl font-bold">Settings</h1>
+	<h1 class="mb-6 text-2xl font-bold">{$_('settings.title')}</h1>
 	<div class="grid gap-6 sm:grid-cols-2">
 		<div class="border-border bg-card rounded-lg border p-6 shadow-sm">
-			<h2 class="mb-4 text-xl font-semibold">User Settings</h2>
+			<h2 class="mb-4 text-xl font-semibold">{$_('settings.userSettings')}</h2>
 
 			<div class="mb-4">
 				<label class="mb-2 block text-sm font-medium" for="userName">Your Name</label>
@@ -77,11 +90,22 @@
 					type="text"
 					id="userName"
 					class="border-input bg-background w-full rounded-md border px-3 py-2"
-					placeholder="Enter your name"
+					placeholder={$_('settings.usernamePlaceholder')}
 					bind:value={nameInput}
 				/>
 				<p class="text-muted-foreground mt-1 text-sm">This will appear on your quiz scores</p>
 			</div>
+			<label class="my-4 flex flex-col">
+				<span>{$_('settings.language')}</span>
+				<select
+					class="border-input mt-2 rounded-md border px-3 py-2 dark:bg-slate-600"
+					bind:value={selectedLanguage}
+				>
+					{#each availableLanguages as lang}
+						<option value={lang.value}>{lang.label}</option>
+					{/each}
+				</select>
+			</label>
 
 			<button
 				class="bg-primary text-primary-foreground hover:bg-primary/90 w-full rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"

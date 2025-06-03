@@ -8,3 +8,6 @@ export const userName = writable('Guest');
 
 // Boring or gigachad mode font (Comic Sans)
 export const fontStyle = writable('normal');
+
+// Language preference
+export const language = writable('en');
