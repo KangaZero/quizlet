@@ -10,9 +10,25 @@
 			"settings": "Settings",
 			"quizDisabledMessage": "Please set your username in Settings and/or add questions in Edit",
 			"quizDisabledTooltip": "Please set your username in Settings first"
-		}
 	},
+  "home": {
+    "title": "Welcome to Quizlet",
+    "description1": "Hello {username}, welcome to Quizlet!",
+    "description2": "Go to settings to add your name, or edit to add questions"
+  },
 	"quiz": {
+    "mode":{
+      "regular": "Regular Mode",
+      "regularDescription1": "{questionsLength} unique questions with a 5-minute time limit",
+      "regularDescription2": "10 unique questions with a 5-minute time limit",
+      "endless": "Endless Mode",
+      "endlessDescription1": "Start with 3 lives and answer as many questions as you can",
+      "endlessDescription2": "* Actually 999 questions",
+      "custom": "Custom Mode",
+      "customDescription1": "Set your own number of questions and other options",
+      "speedrun": "Speedrun Mode",
+      "speedrunDescription1": "Answer 50 unique questions as fast as you can"
+    },
 		"start": "Start Quiz",
 		"next": "Next Question",
 		"finish": "Finish Quiz",
@@ -79,4 +95,5 @@
 		"question": "{count, plural, =1 {Question} other {Questions}}",
 		"score": "{count, plural, =1 {Score} other {Scores}}"
 	}
+}
 }

@@ -12,7 +12,24 @@
 			"quizDisabledTooltip": "最初に設定でユーザー名を設定してください"
 		}
 	},
+  "home": {
+    "title": "Quizletへようこそ",
+    "description1": "こんにちは {username}、Quizletへようこそ！",
+    "description2": "設定に移動して名前を追加するか、編集で問題を追加してください"
+  },
 	"quiz": {
+    "mode": {
+      "regular": "通常モード",
+      "regularDescription1": "{questionsLength} 個のユニークな問題、5分の制限時間",
+      "regularDescription2": "10 個のユニークな問題、5分の制限時間",
+      "endless": "エンドレスモード",
+      "endlessDescription1": "3つのライフでスタートし、できるだけ多くの問題に答えてください",
+      "endlessDescription2": "* 実際には999問です",
+      "custom": "カスタムモード",
+      "customDescription1": "自分で問題数やその他のオプションを設定できます",
+      "speedrun": "スピードランモード",
+      "speedrunDescription1": "50個のユニークな問題にできるだけ早く答えてください"
+    },
 		"start": "クイズを開始",
 		"next": "次の質問",
 		"finish": "クイズを終了",

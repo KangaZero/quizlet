@@ -66,7 +66,9 @@
 	data-theme={$theme}
 >
 	<header class="border-border border-b">
+		{#if browser && locale}
 		<Header {existingQuestions} />
+		{/if}
 	</header>
 
 	<main class="container mx-auto flex-grow p-4">
