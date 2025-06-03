@@ -2,21 +2,18 @@
 	import '../app.css';
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
-	import { page } from '$app/stores';
 	import { theme, userName, fontStyle, language } from '$lib/stores';
 	import { initSampleQuestions } from '$lib/sampleData';
 	import Toaster from '$lib/components/ui/toast/toaster.svelte';
-	import { toast } from '$lib/components/ui/toast';
 	import { getUserSettings, getQuestions } from '$lib/localStorage';
-	import { initI18n, locale, _ } from '$lib/i18n';
+	import { locale, _ } from '$lib/i18n';
+	import Header from '$lib/components/Header.svelte';
+	
 	let { children } = $props();
 	const existingQuestions = getQuestions();
 
 	// Initialize theme from localStorage
 	onMount(() => {
-		// Initialize i18n
-		initI18n();
-
 		const {
 			theme: savedTheme,
 			userName: savedName,
@@ -53,13 +50,7 @@
 		initSampleQuestions();
 	});
 
-	function handleQuizClick(e: MouseEvent) {
-		if (!$userName || existingQuestions.length === 0) {
-			e.preventDefault();
-			// Optionally show a toast message explaining why it's disabled
-			toast.error('Please set your username in Settings and/or add questions in Edit');
-		}
-	}
+	// Header component handles quiz click events now
 	// Update theme when it changes
 	$effect(() => {
 		if (typeof document !== 'undefined') {
@@ -75,67 +66,7 @@
 	data-theme={$theme}
 >
 	<header class="border-border border-b">
-		<div class="container mx-auto flex h-16 flex-col items-center px-4 md:flex-row">
-			<a href="/" class="text-lg font-bold">Quizlet</a>
-			<nav class="mx-auto flex gap-6 md:mx-0 md:ml-auto">
-				<a
-					href="/"
-					class="hover:text-primary transition-colors {$page.url.pathname === '/'
-						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
-						: ''}"
-				>
-					Home
-				</a>
-
-				{#if $userName && existingQuestions.length > 0}
-					<a
-						href="/quiz"
-						class="hover:text-primary transition-colors {$page.url.pathname === '/quiz'
-							? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
-							: ''}"
-					>
-						Quiz
-					</a>
-				{:else}
-					<a
-						href="/quiz"
-						class="text-muted-foreground pointer-events-none cursor-not-allowed opacity-50"
-						aria-disabled="true"
-						on:click={handleQuizClick}
-						title="Please set your username in Settings first"
-					>
-						Quiz
-					</a>
-				{/if}
-
-				<a
-					href="/edit"
-					class="hover:text-primary transition-colors {$page.url.pathname === '/edit'
-						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
-						: ''}"
-				>
-					Edit
-				</a>
-
-				<a
-					href="/scores"
-					class="hover:text-primary transition-colors {$page.url.pathname === '/scores'
-						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
-						: ''}"
-				>
-					Scores
-				</a>
-
-				<a
-					href="/settings"
-					class="hover:text-primary transition-colors {$page.url.pathname === '/settings'
-						? 'border-primary dark:border-primary-foreground border-b-2 font-bold'
-						: ''}"
-				>
-					Settings
-				</a>
-			</nav>
-		</div>
+		<Header {existingQuestions} />
 	</header>
 
 	<main class="container mx-auto flex-grow p-4">

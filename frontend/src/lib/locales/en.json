@@ -1,4 +1,5 @@
 {
+	"title": "Quizlet",
 	"app": {
 		"title": "Quizlet",
 		"nav": {
@@ -6,7 +7,9 @@
 			"quiz": "Quiz",
 			"edit": "Edit",
 			"scores": "Scores",
-			"settings": "Settings"
+			"settings": "Settings",
+			"quizDisabledMessage": "Please set your username in Settings and/or add questions in Edit",
+			"quizDisabledTooltip": "Please set your username in Settings first"
 		}
 	},
 	"quiz": {

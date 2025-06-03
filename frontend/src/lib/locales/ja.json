@@ -1,4 +1,5 @@
 {
+	"title": "Quizlet",
 	"app": {
 		"title": "Quizlet",
 		"nav": {
@@ -6,7 +7,9 @@
 			"quiz": "クイズ",
 			"edit": "編集",
 			"scores": "スコア",
-			"settings": "設定"
+			"settings": "設定",
+			"quizDisabledMessage": "設定でユーザー名を設定するか、編集で問題を追加してください",
+			"quizDisabledTooltip": "最初に設定でユーザー名を設定してください"
 		}
 	},
 	"quiz": {
