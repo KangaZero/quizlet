@@ -12,24 +12,58 @@
 			"quizDisabledTooltip": "最初に設定でユーザー名を設定してください"
 		}
 	},
-  "home": {
-    "title": "Quizletへようこそ",
-    "description1": "こんにちは {username}、Quizletへようこそ！",
-    "description2": "設定に移動して名前を追加するか、編集で問題を追加してください"
-  },
+	"home": {
+		"title": "Quizletへようこそ",
+		"description1": "こんにちは {username}、Quizletへようこそ！",
+		"description2": "設定に移動して名前を追加するか、編集で問題を追加してください"
+	},
+	"score": {
+		"title": "クイズスコア",
+		"noScores1": "クイズスコアが見つかりません",
+		"noScores2": "クイズを受けてください！",
+		"filter": {
+			"description": "モードでフィルター:",
+			"all": "すべてのモード",
+			"regular": "通常",
+			"endless": "エンドレス",
+			"custom": "カスタム",
+			"speedrun": "スピードラン"
+		},
+		"sort": {
+			"description": "並び替え:",
+			"date": "日付",
+			"score": "スコア",
+			"accuracy": "正確さ",
+			"time": "時間（速い順）"
+		},
+		"table": {
+			"player": "プレイヤー",
+			"date": "日付",
+			"mode": "モード",
+			"score": "スコア",
+			"accuracy": "正確さ",
+			"time": "時間"
+		},
+		"pagination": {
+			"previous": "前へ",
+			"next": "次へ",
+			"currentPage": "{currentPage} / {totalPages} ページ、{sortedScoresLength} 件のスコアを表示中",
+			"itemsPerPage": "{itemsPerPage} 件ずつ表示"
+		}
+	},
 	"quiz": {
-    "mode": {
-      "regular": "通常モード",
-      "regularDescription1": "{questionsLength} 個のユニークな問題、5分の制限時間",
-      "regularDescription2": "10 個のユニークな問題、5分の制限時間",
-      "endless": "エンドレスモード",
-      "endlessDescription1": "3つのライフでスタートし、できるだけ多くの問題に答えてください",
-      "endlessDescription2": "* 実際には999問です",
-      "custom": "カスタムモード",
-      "customDescription1": "自分で問題数やその他のオプションを設定できます",
-      "speedrun": "スピードランモード",
-      "speedrunDescription1": "50個のユニークな問題にできるだけ早く答えてください"
-    },
+		"mode": {
+			"regular": "通常モード",
+			"regularDescription1": "{questionsLength} 個のユニークな問題、5分の制限時間",
+			"regularDescription2": "10 個のユニークな問題、5分の制限時間",
+			"endless": "エンドレスモード",
+			"endlessDescription1": "3つのライフでスタートし、できるだけ多くの問題に答えてください",
+			"endlessDescription2": "* 実際には999問です",
+			"custom": "カスタムモード",
+			"customDescription1": "自分で問題数やその他のオプションを設定できます",
+			"speedrun": "スピードランモード",
+			"speedrunDescription1": "50個のユニークな問題にできるだけ早く答えてください"
+		},
 		"start": "クイズを開始",
 		"next": "次の質問",
 		"finish": "クイズを終了",

@@ -2,10 +2,12 @@
 	import { userName } from '$lib/stores';
 	import { getQuestions } from '$lib/localStorage';
 	import { base } from '$app/paths';
-	import { _ } from '$lib/i18n';
+	import { browser } from '$app/environment';
+	import { locale, _ } from '$lib/i18n';
 </script>
 
 <div class="flex min-h-[calc(100vh-10rem)] flex-col items-center justify-center text-center">
+		{#if browser && locale}
 	<h1 class="mb-4 text-4xl font-bold">{$_('home.title')}</h1>
 
 	{#if $userName}
@@ -68,4 +70,7 @@
 			>
 		</div>
 	</div>
+		{:else}
+		<p class="text-xl">Loading...</p>
+		{/if}
 </div>

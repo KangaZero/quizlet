@@ -10,90 +10,125 @@
 			"settings": "Settings",
 			"quizDisabledMessage": "Please set your username in Settings and/or add questions in Edit",
 			"quizDisabledTooltip": "Please set your username in Settings first"
+		}
 	},
-  "home": {
-    "title": "Welcome to Quizlet",
-    "description1": "Hello {username}, welcome to Quizlet!",
-    "description2": "Go to settings to add your name, or edit to add questions"
-  },
-	"quiz": {
-    "mode":{
-      "regular": "Regular Mode",
-      "regularDescription1": "{questionsLength} unique questions with a 5-minute time limit",
-      "regularDescription2": "10 unique questions with a 5-minute time limit",
-      "endless": "Endless Mode",
-      "endlessDescription1": "Start with 3 lives and answer as many questions as you can",
-      "endlessDescription2": "* Actually 999 questions",
-      "custom": "Custom Mode",
-      "customDescription1": "Set your own number of questions and other options",
-      "speedrun": "Speedrun Mode",
-      "speedrunDescription1": "Answer 50 unique questions as fast as you can"
-    },
-		"start": "Start Quiz",
-		"next": "Next Question",
-		"finish": "Finish Quiz",
-		"score": "Your score: {score} out of {total}",
-		"correct": "Correct!",
-		"incorrect": "Incorrect!",
-		"partial": "Partially Correct!",
-		"time": "Time: {minutes}:{seconds}",
-		"questionCount": "{count, plural, =1 {1 question} other {# questions}}",
-		"correctCount": "{count, plural, =1 {1 correct answer} other {# correct answers}}",
-		"incorrectCount": "{count, plural, =1 {1 incorrect option} other {# incorrect options}}",
-		"missedCount": "{count, plural, =1 {You missed 1 correct option.} other {You missed # correct options.}}",
-		"selectedCount": "{count, plural, =1 {You selected 1 incorrect option.} other {You selected # incorrect options.}}"
-	},
-	"edit": {
-		"title": "Quiz Question Manager",
-		"add": "Add Question",
-		"import": "Import JSON",
-		"export": "Export JSON",
-		"delete": "Delete",
-		"save": "Save Question",
-		"cancel": "Cancel",
-		"answerOptions": "Answer Options",
-		"addAnswerOption": "Add answer option",
-		"removeAnswerOption": "Remove answer option",
-		"answerOptionPlaceholder": "Answer option {number}",
-		"answerCount": "{count, plural, =1 {1 answer} other {# answers}}",
-		"atLeastTwoAnswers": "At least two answer options are required"
-	},
-	"settings": {
-		"title": "Settings",
-		"userSettings": "User Settings",
-		"username": "Username",
-		"usernameDescription": "This username will be displayed in the scores section.",
-		"saveButton": "Save Settings",
-		"usernamePlaceholder": "Enter your username",
-		"saveSuccess": "Settings saved successfully",
-		"themeSuccess": "Theme changed to: {theme}",
-		"fontSuccess": "Font changed to {font}!",
-		"appearance": "Appearance",
-		"darkMode": "Dark Mode",
-		"lightMode": "Light Mode",
-		"toggleDarkMode": "Toggle Dark Mode",
-		"fontStyle": "Spice it up",
-		"toggleFontStyle": "Toggle Font Style",
-		"language": "Language",
-		"quizData": "Quiz Data",
-		"resetAllTitle": "Reset All Quiz Data",
-		"questionCountSaved": "You have {count, plural, =0 {no questions} =1 {1 question} other {# questions}} saved",
-		"scoreCountSaved": "You have {count, plural, =0 {no score records} =1 {1 score record} other {# score records}} saved",
-		"dataResetSuccess": "All quiz data has been reset!"
-	},
-	"alertDialog": {
-		"title": "Are you sure?",
-		"message": "This action cannot be undone. This will permanently delete all your questions and scores.",
-		"confirm": "Confirm",
-		"cancel": "Cancel",
-		"reset": "Reset"
-	},
-	"common": {
-		"count": "{count, plural, =0 {no items} =1 {1 item} other {# items}}",
-		"option": "{count, plural, =1 {1 option} other {# options}}",
-		"point": "{count, plural, =1 {1 point} other {# points}}",
-		"question": "{count, plural, =1 {Question} other {Questions}}",
-		"score": "{count, plural, =1 {Score} other {Scores}}"
+		"home": {
+			"title": "Welcome to Quizlet",
+			"description1": "Hello {username}, welcome to Quizlet!",
+			"description2": "Go to settings to add your name, or edit to add questions"
+		},
+		"score": {
+			"title": "Quiz Scores",
+			"noScores1": "No quiz scores found",
+			"noScores2": "Go take a quiz!",
+			"filter": {
+				"description": "Filter by Mode:",
+				"all": "All Modes",
+				"regular": "Regular",
+				"endless": "Endless",
+				"custom": "Custom",
+				"speedrun": "Speedrun"
+			},
+			"sort": {
+				"description": "Sort by:",
+				"date": "Date",
+				"score": "Score",
+				"accuracy": "Accuracy",
+				"time": "Time (fastest first)"
+			},
+			"table": {
+				"player": "Player",
+				"date": "Date",
+				"mode": "Mode",
+				"score": "Score",
+				"accuracy": "Accuracy",
+				"time": "Time"
+			},
+			"pagination": {
+				"previous": "Previous",
+				"next": "Next",
+				"currentPage": "Showing {currentPage} of {totalPages} of {sortedScoresLength} scores",
+				"itemsPerPage": "Items per page"
+			}
+		},
+		"quiz": {
+			"mode": {
+				"regular": "Regular Mode",
+				"regularDescription1": "{questionsLength} unique questions with a 5-minute time limit",
+				"regularDescription2": "10 unique questions with a 5-minute time limit",
+				"endless": "Endless Mode",
+				"endlessDescription1": "Start with 3 lives and answer as many questions as you can",
+				"endlessDescription2": "* Actually 999 questions",
+				"custom": "Custom Mode",
+				"customDescription1": "Set your own number of questions and other options",
+				"speedrun": "Speedrun Mode",
+				"speedrunDescription1": "Answer 50 unique questions as fast as you can"
+			},
+			"start": "Start Quiz",
+			"next": "Next Question",
+			"finish": "Finish Quiz",
+			"score": "Your score: {score} out of {total}",
+			"correct": "Correct!",
+			"incorrect": "Incorrect!",
+			"partial": "Partially Correct!",
+			"time": "Time: {minutes}:{seconds}",
+			"questionCount": "{count, plural, =1 {1 question} other {# questions}}",
+			"correctCount": "{count, plural, =1 {1 correct answer} other {# correct answers}}",
+			"incorrectCount": "{count, plural, =1 {1 incorrect option} other {# incorrect options}}",
+			"missedCount": "{count, plural, =1 {You missed 1 correct option.} other {You missed # correct options.}}",
+			"selectedCount": "{count, plural, =1 {You selected 1 incorrect option.} other {You selected # incorrect options.}}"
+		},
+		"edit": {
+			"title": "Quiz Question Manager",
+			"add": "Add Question",
+			"import": "Import JSON",
+			"export": "Export JSON",
+			"delete": "Delete",
+			"save": "Save Question",
+			"cancel": "Cancel",
+			"answerOptions": "Answer Options",
+			"addAnswerOption": "Add answer option",
+			"removeAnswerOption": "Remove answer option",
+			"answerOptionPlaceholder": "Answer option {number}",
+			"answerCount": "{count, plural, =1 {1 answer} other {# answers}}",
+			"atLeastTwoAnswers": "At least two answer options are required"
+		},
+		"settings": {
+			"title": "Settings",
+			"userSettings": "User Settings",
+			"username": "Username",
+			"usernameDescription": "This username will be displayed in the scores section.",
+			"saveButton": "Save Settings",
+			"usernamePlaceholder": "Enter your username",
+			"saveSuccess": "Settings saved successfully",
+			"themeSuccess": "Theme changed to: {theme}",
+			"fontSuccess": "Font changed to {font}!",
+			"appearance": "Appearance",
+			"darkMode": "Dark Mode",
+			"lightMode": "Light Mode",
+			"toggleDarkMode": "Toggle Dark Mode",
+			"fontStyle": "Spice it up",
+			"toggleFontStyle": "Toggle Font Style",
+			"language": "Language",
+			"quizData": "Quiz Data",
+			"resetAllTitle": "Reset All Quiz Data",
+			"questionCountSaved": "You have {count, plural, =0 {no questions} =1 {1 question} other {# questions}} saved",
+			"scoreCountSaved": "You have {count, plural, =0 {no score records} =1 {1 score record} other {# score records}} saved",
+			"dataResetSuccess": "All quiz data has been reset!"
+		},
+		"alertDialog": {
+			"title": "Are you sure?",
+			"message": "This action cannot be undone. This will permanently delete all your questions and scores.",
+			"confirm": "Confirm",
+			"cancel": "Cancel",
+			"reset": "Reset"
+		},
+		"common": {
+			"count": "{count, plural, =0 {no items} =1 {1 item} other {# items}}",
+			"option": "{count, plural, =1 {1 option} other {# options}}",
+			"point": "{count, plural, =1 {1 point} other {# points}}",
+			"question": "{count, plural, =1 {Question} other {Questions}}",
+			"score": "{count, plural, =1 {Score} other {Scores}}"
+		}
 	}
-}
-}
+

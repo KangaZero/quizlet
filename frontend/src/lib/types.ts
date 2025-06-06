@@ -33,6 +33,6 @@ export interface QuizScore {
 export interface UserSettings {
 	theme: 'light' | 'dark';
 	userName: string;
-	fontStyle?: 'normal' | 'comic'; // Optional font style for gigachad mode
+	fontStyle: 'normal' | 'comic'; // Optional font style for gigachad mode
 	language: 'en' | 'ja';
 }
