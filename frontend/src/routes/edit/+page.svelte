@@ -288,6 +288,9 @@
 				answers: validAnswers,
 				updatedAt: Date.now()
 			});
+			if (browser) {
+				toast.success(`${editingQuestion.id} updated successfully!`);
+			}
 		} else {
 			saveQuestion({
 				id: `q${currentLength}`,
@@ -303,6 +306,9 @@
 					lastUsed: 0
 				}
 			});
+			if (browser) {
+				toast.success(`Question created successfully!`);
+			}
 		}
 
 		isAdding = false;
@@ -453,13 +459,13 @@
 			<AlertDialog.Cancel on:click={closeImportDialog}>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action
 				class="bg-amber-600 hover:bg-amber-700"
-				on:click={importQuestionsWithMode('add')}
+				onclick={importQuestionsWithMode('add')}
 			>
 				Add to Existing
 			</AlertDialog.Action>
 			<AlertDialog.Action
 				class="bg-red-600 hover:bg-red-700"
-				on:click={importQuestionsWithMode('replace')}
+				onclick={importQuestionsWithMode('replace')}
 			>
 				Replace All
 			</AlertDialog.Action>
@@ -610,31 +616,31 @@
 				<thead>
 					<tr class="border-border bg-muted/50 border-b">
 						<th
-							class="cursor-pointer px-4 py-3 text-left text-sm font-medium select-none"
+							class="cursor-pointer select-none px-4 py-3 text-left text-sm font-medium"
 							onclick={() => handleSort('id')}
 						>
 							ID {sortBy === 'id' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
 						</th>
 						<th
-							class="cursor-pointer px-4 py-3 text-left text-sm font-medium select-none"
+							class="cursor-pointer select-none px-4 py-3 text-left text-sm font-medium"
 							onclick={() => handleSort('accuracy')}
 						>
 							Accuracy {sortBy === 'accuracy' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
 						</th>
 						<th
-							class="cursor-pointer px-4 py-3 text-left text-sm font-medium select-none"
+							class="cursor-pointer select-none px-4 py-3 text-left text-sm font-medium"
 							onclick={() => handleSort('attempts')}
 						>
 							Attempts {sortBy === 'attempts' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
 						</th>
 						<th
-							class="cursor-pointer px-4 py-3 text-left text-sm font-medium select-none"
+							class="cursor-pointer select-none px-4 py-3 text-left text-sm font-medium"
 							onclick={() => handleSort('lastUsed')}
 						>
 							Last Used {sortBy === 'lastUsed' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}
 						</th>
 						<th
-							class="cursor-pointer px-4 py-3 text-left text-sm font-medium select-none"
+							class="cursor-pointer select-none px-4 py-3 text-left text-sm font-medium"
 							onclick={() => handleSort('question')}
 						>
 							Question {sortBy === 'question' ? (sortDirection === 'asc' ? '↑' : '↓') : ''}

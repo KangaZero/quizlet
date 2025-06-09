@@ -45,6 +45,9 @@
 	let accuracyMax = 100;
 	let showNoMatchingQuestionsDialog = false;
 
+	// Prevent multiple submits
+	let submitThrottled = false;
+
 	function startElapsedTimeTracking() {
 		if (elapsedTimeTimer) clearInterval(elapsedTimeTimer);
 
@@ -393,6 +396,11 @@
 
 	// Handle submission for multiple correct answer questions
 	function submitMultipleAnswers() {
+		// If the function is throttled, ignore this call
+		if (submitThrottled) return;
+
+		// Set the throttle flag to prevent additional calls
+		submitThrottled = true;
 		const currentQuestion = questions[currentQuestionIndex];
 		const correctAnswerIndices = currentQuestion.answers
 			.map((answer, index) => (answer.isCorrect ? index : -1))
@@ -447,6 +455,9 @@
 			if (!(mode === 'endless' && lives <= 0)) {
 				moveToNextQuestion();
 			}
+			setTimeout(() => {
+				submitThrottled = false;
+			}, 1000);
 		}, 1000);
 	}
 
@@ -791,6 +802,7 @@
 					<button
 						class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md border px-4 py-2 transition-colors hover:scale-105 active:scale-95"
 						onclick={submitMultipleAnswers}
+						disabled={getCurrentQuestion().answers.filter((a) => a.isCorrect).length <= 1}
 					>
 						Submit Answers
 					</button>
