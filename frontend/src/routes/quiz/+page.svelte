@@ -706,7 +706,7 @@
 {:else if isQuizStarted && !isQuizFinished && questions.length > 0}
 	<div class="mx-auto max-w-3xl">
 		<div class="flex flex-col md:flex-row items-center justify-between">
-			<div class="container">
+			<div class="">
 				<span class="text-lg font-bold">Score: {score}</span>
 
 				{#if mode === 'endless'}
@@ -725,16 +725,15 @@
 				{/if}
 			</div>
 
-			<div class="flex items-center gap-4">
-				<!-- Show elapsed time for all modes -->
+			<div class="flex tems-center gap-4">
+				<!-- Show countdown timer for regular mode -->
+				{#if mode === 'regular'}
+					<span class="text-sm font-medium">Remaining: {formatTime(timeRemaining)}</span>
+				{/if}
+						<!-- Show elapsed time for all modes -->
 				<span class="text-sm font-medium">
 					Elapsed time: {formatElapsedTime(elapsedTime)}
 				</span>
-
-				<!-- Show countdown timer for regular mode -->
-				{#if mode === 'regular'}
-					<span class="text-lg font-bold">Remaining: {formatTime(timeRemaining)}</span>
-				{/if}
 			</div>
 		</div>
 		<div class="border-border bg-card my-4 md:my-8 rounded-lg border p-6 shadow-md">
