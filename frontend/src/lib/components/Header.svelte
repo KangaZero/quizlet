@@ -18,7 +18,7 @@
 
 <div class="container mx-auto flex h-16 flex-col items-center px-4 md:flex-row">
     <a href="/" class="text-lg font-bold">{$_('title')}</a>
-    <nav class="mx-auto flex gap-6 md:mx-0 md:ml-auto">
+    <nav class="mx-auto flex gap-6 md:mx-0 md:ml-auto mt-2 md:mt-0">
         <a
             href="/"
             class="hover:text-primary transition-colors {$page.url.pathname === '/'

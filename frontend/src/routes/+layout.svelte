@@ -71,7 +71,7 @@
 		{/if}
 	</header>
 
-	<main class="container mx-auto flex-grow p-4">
+	<main class="container max-w-svw min-h-dvh mx-auto flex-grow p-4">
 		{@render children()}
 	</main>
 

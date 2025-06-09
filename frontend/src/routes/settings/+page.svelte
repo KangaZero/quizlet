@@ -19,8 +19,8 @@
 		saveUserSettings({
 			userName: nameInput,
 			theme: $theme,
-			fontStyle: $fontStyle,
-			language: selectedLanguage
+			fontStyle: $fontStyle as 'normal' | 'comic',
+			language: selectedLanguage as 'en' | 'ja'
 		});
 		if (browser) {
 			toast.success($_('settings.saveSuccess'));
@@ -30,7 +30,12 @@
 	function toggleTheme() {
 		theme.update((currentTheme) => {
 			const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-			saveUserSettings({ userName: $userName, theme: newTheme });
+			saveUserSettings({
+				userName: $userName,
+				theme: newTheme,
+				fontStyle: $fontStyle as 'normal' | 'comic',
+				language: $language as 'en' | 'ja'
+			});
 			if (browser) {
 				toast.success($_('settings.themeSuccess', { values: { theme: newTheme } }));
 			}
@@ -46,7 +51,8 @@
 			saveUserSettings({
 				userName: $userName,
 				theme: $theme,
-				fontStyle: newFont
+				fontStyle: newFont,
+				language: $language as 'en' | 'ja'
 			});
 
 			// Apply the font change

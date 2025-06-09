@@ -705,8 +705,8 @@
 	</div>
 {:else if isQuizStarted && !isQuizFinished && questions.length > 0}
 	<div class="mx-auto max-w-3xl">
-		<div class="flex items-center justify-between">
-			<div>
+		<div class="flex flex-col md:flex-row items-center justify-between">
+			<div class="container">
 				<span class="text-lg font-bold">Score: {score}</span>
 
 				{#if mode === 'endless'}
@@ -737,7 +737,7 @@
 				{/if}
 			</div>
 		</div>
-		<div class="border-border bg-card my-8 rounded-lg border p-6 shadow-md">
+		<div class="border-border bg-card my-4 md:my-8 rounded-lg border p-6 shadow-md">
 			<div class="mb-2 flex flex-wrap items-center justify-between">
 				<div class="text-muted-foreground text-sm">
 					Question {currentQuestionIndex + 1} of {mode === 'endless' ? 'Endless' : questions.length}
@@ -846,8 +846,8 @@
 					</button>
 
 					<div class="flex flex-wrap justify-center gap-2">
-						{#if questions.length <= 10}
-							<!-- Show all buttons if 10 or fewer questions -->
+						{#if questions.length <= 5}
+							<!-- Show all buttons if 5 or fewer questions -->
 							{#each questions as _, i}
 								<button
 									class="h-8 w-8 rounded-full text-sm
